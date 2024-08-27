@@ -1,0 +1,73 @@
+﻿@page "/admin/employees"
+@using SOS.OrderTracking.Web.Shared
+@using SOS.OrderTracking.Web.Shared.ViewModels.UserRoles
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@using SOS.OrderTracking.Web.Client.Components
+@inject HttpClient Http
+@inherits APICrudBaseV2<EmployeesViewModel, EmployeesListViewModel, int, EmployeesAdditionalValueViewModel,EmployeesService>
+@attribute [Authorize(Roles = "SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin")]
+
+<SubHeader Heading="All Employees" RowsCount="TotalRows" SearchString="SearchString"></SubHeader>
+<FluentCard IsBusy="@IsTableBusy">
+
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+    @*<EditForm Model="@this">
+
+            <div class="row">
+                <div class="ml-5 col-3 mt-5">
+                    <Select2 @bind-Value="roleTypeId" Datasource="RoleTypes" Id="__rolestype" />
+                </div>
+            </div>
+        </EditForm>*@
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Employee Code</th>
+                <th>Employee Name</th>
+                <th>User Name</th>
+                <th>User Roles</th>
+                <th>Organizational Unit</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items == null)
+            {
+                <tr>
+                    <td colspan="3"> <p><em>Loading...</em></p></td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Items)
+                {
+                    <tr>
+                        <td>
+                            @item.EmployeeCode
+                        </td>
+                        <td>
+                            @item.EmployeeName
+                        </td>
+                        <td>@item.UserName</td>
+                        <td>@(string.Join(',', item.Role))</td>
+                        <td>@item.OrganizationName</td>
+
+                        <td style="padding:2px; text-align:right">
+                            <a class="btn btn-icon btn-sm mr-2">
+                                <i class="far fa-check-circle" style="color:@item.TickColor"></i>
+                            </a>
+                        </td>
+
+                    </tr>
+                }
+            }
+
+        </tbody>
+
+    </table>
+
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>

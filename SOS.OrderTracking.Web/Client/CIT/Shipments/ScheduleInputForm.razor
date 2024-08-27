@@ -1,0 +1,160 @@
+﻿@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using Radzen.Blazor
+<div class="">
+    <div class="table table-light table-light-success">
+        <div>
+            <div class="bg-white row">
+                <div class="col-4" style=" padding-right: 0px;">Monday</div>
+                <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.MondayScheduleExist" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.MondayScheduleExist)
+                    {
+                        <RadzenDatePicker TValue="DateTime?" HourFormat="12" @bind-Value="ScheduleViewModel.MondayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                    else
+                    {
+                        <RadzenDatePicker TValue="DateTime?" HourFormat="12" ReadOnly="true" @bind-Value="ScheduleViewModel.MondayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                </div>
+            </div>
+            <div class="bg-gray-100 row">
+                <div class="col-4" style=" padding-right: 0px;">Tuesday</div>
+                <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.TuesdayScheduleExist" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.TuesdayScheduleExist)
+                    {
+                        <RadzenDatePicker TValue="DateTime?" HourFormat="12" @bind-Value="ScheduleViewModel.TuesdayTime" ShowTime="true" TimeOnly="true"  DateFormat="HH:mm tt" />
+                    }
+                    else
+                    {
+                        <RadzenDatePicker TValue="DateTime?" HourFormat="12" ReadOnly="true" @bind-Value="ScheduleViewModel.TuesdayTime" ShowTime="true" TimeOnly="true"  DateFormat="HH:mm tt"/>
+                    }
+                </div>
+            </div>
+            <div class="bg-white row">
+                <div class="col-4" style=" padding-right: 0px;">Wednesday</div>
+                <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.WednesdayScheduleExist" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.WednesdayScheduleExist)
+                    {
+                        <RadzenDatePicker TValue="DateTime?" @bind-Value="ScheduleViewModel.WednesdayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                    else
+                    {
+                        <RadzenDatePicker TValue="DateTime?" ReadOnly="true" @bind-Value="ScheduleViewModel.WednesdayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                </div>
+            </div>
+            <div class="bg-gray-100 row">
+                <div class="col-4" style=" padding-right: 0px;">Thursday</div>
+                <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.ThursdayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.ThursdayScheduleExist)
+                    {
+                        <RadzenDatePicker TValue="DateTime?" @bind-Value="ScheduleViewModel.ThursdayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                    else
+                    {
+                        <RadzenDatePicker TValue="DateTime?" ReadOnly="true" @bind-Value="ScheduleViewModel.ThursdayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                </div>
+            </div>
+            <div class="bg-white row">
+                <div class="col-4" style=" padding-right: 0px;">Friday</div>
+                <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8 ">
+                            <input type="checkbox" @bind="ScheduleViewModel.FridayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.FridayScheduleExist)
+                    {
+                        <RadzenDatePicker TValue="DateTime?" @bind-Value="ScheduleViewModel.FridayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                    else
+                    {
+                        <RadzenDatePicker TValue="DateTime?" ReadOnly="true" @bind-Value="ScheduleViewModel.FridayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                </div>
+            </div>
+            <div class="bg-gray-100 row">
+                <div class="col-4" style=" padding-right: 0px;">Saturday</div>
+                <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8 ">
+                            <input type="checkbox" @bind="ScheduleViewModel.SaturdayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.SaturdayScheduleExist)
+                    {
+                        <RadzenDatePicker TValue="DateTime?" @bind-Value="ScheduleViewModel.SaturdayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                    else
+                    {
+                        <RadzenDatePicker TValue="DateTime?" ReadOnly="true" @bind-Value="ScheduleViewModel.SaturdayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                </div>
+            </div>
+            <div class="bg-white row">
+                <div class="col-4" style=" padding-right: 0px;">Sunday</div>
+                <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8 ">
+                            <input type="checkbox" @bind="ScheduleViewModel.SundayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.SundayScheduleExist)
+                    {
+                        <RadzenDatePicker TValue="DateTime?" @bind-Value="ScheduleViewModel.SundayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                    else
+                    {
+                        <RadzenDatePicker TValue="DateTime?" ReadOnly="true" @bind-Value="ScheduleViewModel.SundayTime" ShowTime="true" TimeOnly="true" DateFormat="HH:mm tt" />
+                    }
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ScheduleViewModel ScheduleViewModel { get; set; }
+}

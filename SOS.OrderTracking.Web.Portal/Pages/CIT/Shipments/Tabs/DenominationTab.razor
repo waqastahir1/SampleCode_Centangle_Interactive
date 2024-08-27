@@ -1,0 +1,221 @@
+﻿@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using SOS.OrderTracking.Web.Shared.StaticClasses
+
+<div class="tab-pane fade" id="denomination_@Id" role="tabpanel" aria-labelledby="denomination_@Id">
+
+    <div class="">
+        @if (CurrencySymbol == CurrencySymbol.MixCurrency || CurrencySymbol == CurrencySymbol.Other)
+        {
+            <div class="table table-light table-light-success">
+                <div>
+                    @if (Denomination?.Valuables != null)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-12" style=" padding-right: 0px;">@Denomination.Valuables @Denomination.Type</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (CurrencySymbol == CurrencySymbol.PrizeBond)
+        {
+            <div class="table table-light table-light-success">
+                @{
+                    int? factor = Denomination?.Factor;
+                }
+                <div>
+                    @if (Denomination?.Currency40000x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency40000x @Denomination.Type x 40,000) + @Denomination.PrizeMoney40000x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(40000, Denomination.Currency40000x, Denomination.PrizeMoney40000x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency25000x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency25000x @Denomination.Type x 25,000) + @Denomination.PrizeMoney25000x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(25000, Denomination.Currency25000x, Denomination.PrizeMoney25000x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency15000x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency15000x @Denomination.Type x 15,000) + @Denomination.PrizeMoney15000x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(15000, Denomination.Currency15000x, Denomination.PrizeMoney15000x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency7500x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency7500x @Denomination.Type x 7,500) + @Denomination.PrizeMoney7500x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(7500, Denomination.Currency7500x, Denomination.PrizeMoney7500x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency1500x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency1500x @Denomination.Type x 1,500) + @Denomination.PrizeMoney1500x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(1500, Denomination.Currency1500x, Denomination.PrizeMoney1500x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency750x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency750x @Denomination.Type x 750) + @Denomination.PrizeMoney750x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(750, Denomination.Currency750x, Denomination.PrizeMoney750x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency200x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency200x @Denomination.Type x 200) + @Denomination.PrizeMoney200x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(200, Denomination.Currency200x, Denomination.PrizeMoney200x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+
+                    @if (Denomination?.Currency100x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-7" style=" padding-right: 0px;">(@Denomination.Currency100x @Denomination.Type x 100) + @Denomination.PrizeMoney100x</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @(CurrencyHelper.PrizeBondFormula(100, Denomination.Currency100x, Denomination.PrizeMoney100x, Denomination.Type).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        }
+        else
+        {
+            <div class="table table-light table-light-success">
+                @{
+                    int? factor = Denomination?.Factor;
+                }
+                <div>
+                    @if (Denomination?.Currency5000x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination.Currency5000x.GetValueOrDefault().ToString("N0") @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px;padding-left: 0px;">x @CurrencySymbol.ToString(). 5,000</div>
+                            <div class="font-weight-bold col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency5000x * factor * 5000).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency1000x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency1000x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString(). 1,000</div>
+                            <div class="font-weight-bold col-5" style=" padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency1000x * factor * 1000).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency500x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency500x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString(). 500</div>
+                            <div class="col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency500x * factor * 500).GetValueOrDefault().ToString("N0"))</div>
+
+                        </div>
+                    }
+                    @if (Denomination?.Currency100x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency100x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString(). 100</div>
+                            <div class="font-weight-bold col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency100x * factor * 100).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency75x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency75x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString(). 75</div>
+                            <div class="font-weight-bold col-5" style="padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency75x * factor * 75).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency50x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency50x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString(). 50</div>
+                            <div class="col-5" style=" padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency50x * factor * 50).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency20x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-gray-100 row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency20x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString().20</div>
+                            <div class="font-weight-bold col-5" style=" padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency20x * factor * 20).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency10x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency10x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString().10</div>
+                            <div class="font-weight-bold col-5" style=" padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency10x * factor * 10).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+
+                    @if (Denomination?.Currency5x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency5x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString().5</div>
+                            <div class="font-weight-bold col-5" style=" padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency5x * factor * 5).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency2x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency2x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString().2</div>
+                            <div class="font-weight-bold col-5" style=" padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency2x * factor * 2).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                    @if (Denomination?.Currency1x.GetValueOrDefault() > 0)
+                    {
+                        <div class="bg-white row">
+                            <div class="col-4" style=" padding-right: 0px;">@Denomination?.Currency1x @Denomination.Type</div>
+                            <div class="col-3" style=" padding-right: 0px; padding-left: 0px;">x @CurrencySymbol.ToString().1</div>
+                            <div class="font-weight-bold col-5" style=" padding-left: 0px;">= @CurrencySymbol.ToString(), @((@Denomination?.Currency1x * factor * 1).GetValueOrDefault().ToString("N0"))</div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        }
+    </div>
+    <hr class="st1">
+    <div class="d-flex flex-column text-md-right">
+        <span class="font-size-h7 font-weight-boldest text-primary mb-0">
+            <span class="font-size-xs text-dark-50 font-weight-bolder mb-1 ml-3">TOTAL: &nbsp;</span>@CurrencySymbol.ToString(). @Amount.ToString("N0")<br />
+        </span>
+    </div>
+
+    <div class="d-flex flex-column text-md-right">
+        <span class="font-size-h7 font-weight-boldest mb-0">
+            @*@{ amountInWords = CalculateAmountInWords(Amount);}*@
+            <span class="font-size-xs text-dark-50 font-weight-bolder mb-1 ml-3"></span>@AmountInWords
+        </span>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public CitDenominationViewModel Denomination { get; set; }
+
+    [Parameter]
+    public CurrencySymbol CurrencySymbol { get; set; }
+
+    [Parameter]
+    public string AmountInWords { get; set; }
+
+    [Parameter]
+    public decimal Amount { get; set; }
+
+    [Parameter]
+    public int Id { get; set; }
+
+}

@@ -1,0 +1,129 @@
+﻿@page "/admin/additionalrequests"
+@using SOS.OrderTracking.Web.Shared.ViewModels.Parties
+@using SOS.OrderTracking.Web.Client.Components
+@using Radzen.Blazor
+@inject HttpClient Http
+
+@inherits APICrudBase<AdditionalRequestFormViewModel, AdditionRequestListViewModel, int>
+
+<div class="subheader py-2 py-lg-4  subheader-solid" id="kt_subheader">
+    <div class=" container-fluid  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Additional Requests
+            </h5>
+            <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-5 bg-gray-200"></div>
+            <div class="d-flex align-items-center" id="kt_subheader_search">
+                <span class="text-dark-50 font-weight-bold" id="kt_subheader_total">
+                    @TotalRows Total
+                </span>
+                @*<form class="ml-5">
+                    <div class="input-group input-group-sm input-group-solid" style="max-width: 175px">
+                        <input type="text" class="form-control" id="kt_subheader_search_form" placeholder="Search...">
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <span class="svg-icon">
+                                    <i class="fal fa-search"></i>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </form>*@
+            </div>
+        </div>
+        <div class="d-flex align-items-center">
+            <a @onclick="()=> OnItemClicked(0)" class="btn btn-light-warning font-weight-bold ml-2">
+                Add Requests
+            </a>
+        </div>
+    </div>
+</div>
+<FluentCard IsBusy="@IsTableBusy">
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Request Status</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items != null)
+                {
+                    @foreach (var item in Items)
+                    {
+                        <tr>
+                            <td>
+                                @item.Id
+                            </td>
+                            <td>@item.FromDate</td>
+                            <td>@item.ThruDate</td>
+                            <td>@item.RequestStatus</td>
+                            <td></td>
+                            <td style="padding:2px; text-align:right">
+                                <a class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;" @onclick="() => OnItemClicked(item.Id)">
+                                    <i class="flaticon2-pen"></i>
+                                </a>
+
+                                @*<a class="btn btn-icon btn-light-danger btn-sm mr-2" href='admin/crewmembers/@item.Id'>
+                                    <i class="fa fa-user-friends"></i>
+                                </a>*@
+                            </td>
+
+                        </tr>
+                    }
+                }
+
+        </tbody>
+    </table>
+    <EditForm Model="CurrentIndex">
+        <PaginationStrip @bind-Value="CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>
+<InputForm Id="form1"
+           SelectedItem="SelectedItem"
+           IsBusy="IsModalBusy"
+           Heading="Add Request"
+             OnCancel="()=> SelectedItem = null"
+           OnValidSubmit="OnFormSubmit">
+
+    <div class="form-group">
+        <label>Operation:</label>
+        <RadzenDropDown AllowClear="true" TValue="int" class="form-control"
+                        Data="@Operations" Placeholder="Select an Operation" AllowFiltering="true"
+                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.Operation" />
+
+    </div>
+    <div class="form-group">
+        <label>Type:</label>
+        <RadzenDropDown AllowClear="true" TValue="int" class="form-control"
+                        Data="@typeOfRequest" Placeholder="Select type of request" AllowFiltering="true"
+                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.Type" />
+    </div>
+    <div class="form-group">
+        <label>Quantity:</label>
+                <InputNumber @bind-Value="SelectedItem.Quantity" class="form-control">
+
+                </InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Start Date</label><br />
+        <RadzenDatePicker  TValue="DateTime?" @bind-Value="@SelectedItem.FromDate" DateFormat="dd-MM-yyyy"   Style="width:100%;box-shadow:none" />
+        <ValidationMessage For="() => SelectedItem.FromDate"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>End Date</label><br />
+        <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.ThruDate" DateFormat="dd-MM-yyyy"   Style="width:100%;box-shadow:none" />
+        <ValidationMessage For="() => SelectedItem.ThruDate"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Remarks</label><br />
+        <InputTextArea class="form-control"  @bind-Value="SelectedItem.Remarks">
+        </InputTextArea>
+    </div>
+</InputForm>
+}

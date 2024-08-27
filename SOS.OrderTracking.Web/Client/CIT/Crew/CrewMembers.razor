@@ -1,0 +1,216 @@
+﻿@page "/admin/crewmembers/{id:int}"
+@using SOS.OrderTracking.Web.Shared.ViewModels.Crew
+@using SOS.OrderTracking.Web.Shared.ViewModels
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@inherits APICrudBaseV2<CrewMemberViewModel, CrewMemberListModel, int, CrewMemberAdditionalValueViewModel, CrewMembersService>
+
+<CascadingValue Value="@this">
+    <SubHeader Heading='Manage Crew Assembly' RowsCount="@TotalRows" HideSearch="true">
+        <a @onclick="()=> OnItemClicked(0)" class="btn btn-light-warning font-weight-bold ml-2">
+            Allocate Crew Members
+        </a>
+        <a @onclick="()=> PubSub.Hub.Default.Publish<CrewMembers>(null)" class="btn btn-secondary font-weight-bold ml-2">
+            <span><i class="fa fa-times"></i></span>
+        </a>
+    </SubHeader>
+
+    <FluentCard IsBusy="@IsTableBusy">
+        <div class="row">
+            <div class="col-6 text-black bold">
+                <h6>Crew Name: @crewName </h6>
+            </div>
+        </div>
+        <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+        @if (Items != null)
+        {
+            if (Items.Count() == 0)
+            {
+                <h4 style="text-align:center; margin:auto;">
+                    This crew assembly is empty<br />
+                    <a @onclick="()=> OnItemClicked(0)" class="btn btn-secondary font-weight-bold mt-4">
+                        Click here to allocate first member
+                    </a>
+                </h4>
+            }
+            else
+            {
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th @onclick='()=>BaseIndexModel.SortColumn = $"EmployeeName-{InverseState()}"' style="cursor:pointer">
+                                Name/Designation
+                                @if (BaseIndexModel.SortColumn?.Split('-').First() == "EmployeeName")
+                                {
+                                    if (State)
+                                    {
+                                        <span><i class="fad fa-sort-up ml-2"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="fad fa-sort-down ml-2"></i></span>
+                                    }
+                                }
+                            </th>
+                            @*<Td Key="EmployeeName" API="@this">Name/Designation</Td>*@
+                            @*<th>Designation</th>*@
+                            <th @onclick='()=>BaseIndexModel.SortColumn = $"StartDate-{InverseState()}"' style="cursor:pointer">
+                                Start Date
+                                @if (BaseIndexModel.SortColumn?.Split('-').First() == "StartDate")
+                                {
+                                    if (State)
+                                    {
+                                        <span><i class="fad fa-sort-up ml-2"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <span><i class="fad fa-sort-down ml-2"></i></span>
+                                    }
+                                }
+                            </th>
+                            @*<Td Key="StartDate" API="@this">Start Date</Td>*@
+                            <th>End Date</th>
+                            <th>Today's Timing</th>
+                        </tr>
+                    </thead>
+                    <tbody style="line-height:20px;">
+
+                        @foreach (var member in Items.OrderByDescending(x => x.IsActive).ThenBy(x => x.StartDate))
+                        {
+                            <tr>
+                                @{
+                                    string time = "";
+                                    string colour = "";
+                                    time = member.CheckinTime.HasValue ? member.CheckinTime.Value.ToString("HH:mm") : "";
+                                    colour = string.IsNullOrEmpty(time) ? "#eb1b1b" : "#42b542";
+                                }
+                                <td style="width:200px;">
+                                    @member.EmployeeName <br />
+
+                                    <small class="btn btn-xs btn-pill" style="color:@(member.IsActive?"#3493cf": "#eb1b1b");border-color:@(member.IsActive?"#3493cf": "#eb1b1b");">
+                                        @member.EmployeeCode - @EnumHelper.GetDisplayValue(member.RelationshipType)
+                                    </small>
+                                </td>
+                                <td>
+                                    @member.StartDate.ToString("dd-MM-yy")
+                                </td>
+                                <td>
+                                    @member.EndDate?.ToString("dd-MM-yy")
+                                </td>
+
+                                <td>
+                                    @time <br />
+                                    @{
+                                        time = member.CheckoutTime.HasValue ? member.CheckoutTime.Value.ToString("HH:mm") : "";
+                                    }
+                                    @if (!string.IsNullOrEmpty(time))
+                                        time = " - " + time;
+                                    @time
+                                </td>
+
+                                @*<td>@time</td>*@
+                                <td style="padding:2px; text-align:right">
+                                    <a class="btn btn-icon btn-light-danger btn-sm mr-2"
+                           style="cursor:pointer;" @onclick="() => OnItemClicked(member.Id)">
+                                        <i class="flaticon2-pen"></i>
+                                    </a>
+                                    <a class="btn btn-icon btn-light-danger btn-sm mr-2"
+                           style="cursor:pointer;" @onclick="() => OnRemoveItemClicked(member.Id)">
+                                        <i class="fas fa-user-minus"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            }
+        }
+        <EditForm Model="BaseIndexModel.CurrentIndex">
+            <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+        </EditForm>
+    </FluentCard>
+
+    <InputForm SelectedItem="SelectedItem"
+               IsBusy="IsModalBusy"
+               Heading=" Crew Member Form"
+               OnCancel="() => { SelectedItem = null; ValidationError = null;}"
+               Error="@ValidationError"
+               OnValidSubmit="ShowConformation">
+        @*<ValidationSummary></ValidationSummary>*@
+        @if (SelectedItem.Id == 0)
+        {
+            <div class="form-group">
+                <label>Employee</label>
+                <RadzenDropDown AllowClear="true" TValue="int" class="form-control"
+                            Data="@People" Placeholder="Select an Employee" AllowFiltering="true"
+                            TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.EmployeeId" />
+                <ValidationMessage For="() => SelectedItem.EmployeeId"></ValidationMessage>
+            </div>
+            <div class="form-group">
+                <label>Designation</label>
+                <InputSelect class="form-control" @bind-Value="SelectedItem.RelationshipType">
+                    <option value="@RoleType.CheifCrewAgent">Crew Chief</option>
+                    <option value="@RoleType.AssistantCrewAgent">Assistant Chief Crew</option>
+                    <option value="@RoleType.CrewDriver">Driver</option>
+                    <option value="@RoleType.CrewGuard">Guard</option>
+                    <ValidationMessage For="() => SelectedItem.RelationshipType"></ValidationMessage>
+                </InputSelect>
+            </div>
+            <div class="form-group">
+                <label>Start Date</label>
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.StartDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+                <ValidationMessage For="() => SelectedItem.StartDate"></ValidationMessage>
+            </div>
+            <div class="form-group">
+                <label>End Date</label>
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.EndDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+                <ValidationMessage For="() => SelectedItem.EndDate"></ValidationMessage>
+            </div>
+        }
+        else
+        {
+            <div class="form-group">
+                <label>Name:</label><br />
+                <label class="form-control">@SelectedItem.EmployeeName</label>
+            </div>
+            <div class="form-group">
+                <label>Designation:</label><br />
+                <label class="form-control">@SelectedItem.RelationshipType</label>
+            </div>
+            <div class="form-group">
+                <label>Start Date:</label><br />
+                <label class="form-control">@SelectedItem.StartDate</label>
+            </div>
+            <div class="form-group">
+                <label>End Date</label>
+                <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.EndDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+                <ValidationMessage For="() => SelectedItem.EndDate"></ValidationMessage>
+            </div>
+
+        }
+    </InputForm>
+
+    <InputForm SelectedItem="RelationshipDetailViewModel"
+               IsBusy="IsModalBusy"
+               Heading=" Relationship Detail Form"
+               OnCancel="() => { RelationshipDetailViewModel = null; ValidationError = null;}"
+               Error="@ValidationError"
+               OnValidSubmit="async()=> {  RelationshipDetailViewModel = null; await OnFormSubmit(); }">
+        <RelationshipDetailComponent Model="RelationshipDetailViewModel"></RelationshipDetailComponent>
+    </InputForm>
+
+    <InputForm SelectedItem="CrewMemberOperationsViewModel"
+               IsBusy="IsModalBusy"
+               Heading=" Relationship Detail Form"
+               OnCancel="() => { CrewMemberOperationsViewModel = null; ValidationError = null;}"
+               Error="@ValidationError"
+               OnValidSubmit="async()=> { await RemoveCrewMember(); }">
+        @if (CrewMemberOperationsViewModel.RelationshipId > 0)
+        {
+            <label>@CrewMemberOperationsViewModel.EmployeeName will remove from this crew do you want to proceed ?</label>
+        }
+    </InputForm>
+</CascadingValue>

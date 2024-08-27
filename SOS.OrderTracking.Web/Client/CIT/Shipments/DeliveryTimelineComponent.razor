@@ -1,0 +1,113 @@
+﻿@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using SOS.OrderTracking.Web.Shared
+<div class="tab-pane fade" id="delivery_timeline_@Item?.Id" role="tabpanel" aria-labelledby="delivery_timeline_@Item?.Id">
+
+    <div class="timeline timeline-5 mt-8 mb-8">
+        <!--begin::Item-->
+        @if (Item != null &&  Item.DeliveryStates != null)
+        {
+            @foreach (var deliveryState in Item.DeliveryStates)
+{
+    string color = deliveryState.Status == StateTypes.Waiting ? "danger" : "success";
+    string timeStamp = deliveryState.TimeStamp.HasValue ?
+        deliveryState.TimeStamp.Value.ToString("HH:mm") : "--:--";
+    string fontStyle = deliveryState.Status == StateTypes.Waiting ?
+        "text-dark-50" : "font-weight-bolder text-dark-75 font-size-lg";
+                 
+        var first = Item.Deliveries.FirstOrDefault();
+        var last = Item.Deliveries.LastOrDefault();
+    
+        @if (first != null && last != null)
+        {
+           
+    <div class="timeline-item align-items-start">
+    <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg text-right pr-3">@timeStamp</div>
+    <div class="timeline-badge">
+        <i class="fa fa-genderless text-@color icon-xxl"></i>
+    </div>
+    <div class="timeline-content @fontStyle">
+        @(EnumHelper.GetDisplayValue(deliveryState.ConsignmentStateType))
+        @if (deliveryState.ConsignmentStateType == ConsignmentState.CrewAssigned)
+        {
+            <span style="color:#242de2; cursor: pointer;" @onclick="ShowCrew">@Item?.Deliveries.FirstOrDefault()?.CrewName</span>
+        }
+        else if (deliveryState.ConsignmentStateType == ConsignmentState.ReachedPickup)
+        {
+            @if ((first.CollectionPoint?.Lat) > 0 && (first.CollectionPoint?.Lng) > 0)
+            {
+                <a class="float-right" href="https://www.google.com/maps/place/@first.CollectionPoint.Lat,@first.CollectionPoint.Lng"
+                   target="_blank">
+                    <i class="ml-2 far fa-lg fa-map-marker-alt" style="color:#242de2"></i>
+                </a>
+
+                <a class="float-right">
+                    <i class="ml-2 far fa-lg fa-@(first.CollectionPointStatus > DataRecordStatus.Approved ? "lock text-success" : "unlock-alt text-warning")"></i>
+                </a>
+            }
+            else
+            {
+                <a class="float-right">
+                    <i class="fad fa-lg fa-map-marker-slash"></i>
+                </a>
+            }
+
+            if (ConsignmentState >= ConsignmentState.InTransit)
+            {
+                <span class="float-right">
+                    <i class='far fa-lg fa-@(last.CollectionMode == 1? "qrcode": "forward")'></i>
+                </span>
+            }
+
+        }
+        else if (deliveryState.ConsignmentStateType == ConsignmentState.InTransit)
+        {
+        <span class="float-right" style="cursor:pointer;" @onclick="InTransitClicked"> <i class="fad fa-truck-loading"></i></span>
+        }
+        else if (deliveryState.ConsignmentStateType == ConsignmentState.ReachedDestination)
+        {
+            @if ((last.DeliveryPoint?.Lat) > 0 && (last.DeliveryPoint?.Lng) > 0)
+            {
+                <a class="float-right" href="https://www.google.com/maps/place/@last.DeliveryPoint.Lat,@last.DeliveryPoint.Lng"
+                   target="_blank">
+                    <i class="far ml-2 fa-lg fa-map-marker-alt" style="color:#242de2"></i>
+                </a>
+
+                <a class="float-right">
+                    <i class="far ml-2 fa-lg fa-@(last.DeliveryPointStatus > DataRecordStatus.Approved ? "lock text-success" : "unlock-alt text-warning")"></i>
+                </a>
+            }
+            else
+            {
+                <a class="float-right">
+                    <i class="fad fa-lg fa-map-marker-slash"></i>
+                </a>
+            }
+
+            if (ConsignmentState >= ConsignmentState.Delivered)
+            {
+                <span class="float-right">
+                    <i class='far fa-lg fa-@(last.DeliveryMode == 1? "qrcode": "forward")'></i>
+                </span>
+            }
+        }
+
+
+    </div>
+</div>}
+}
+        }
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ConsignmentListViewModel Item { get; set; }
+   
+    [Parameter]
+    public EventCallback ShowCrew { get; set; }
+
+    [Parameter]
+    public ConsignmentState ConsignmentState { get; set; }
+
+    [Parameter]
+    public EventCallback InTransitClicked { get; set; }
+}

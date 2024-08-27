@@ -1,0 +1,64 @@
+﻿<div class="card-header ribbon ribbon-right">
+    <div class="ribbon-target " style="top: 10px; right: -2px;">
+        <i class="flaticon2-pen text-white mr-5"></i>
+
+        <ul class="nav ">
+            <li class="nav-item dropdown">
+                <div style="padding:4px;" class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#"
+                     role="button" aria-haspopup="true" aria-expanded="false">
+                    &nbsp; <i class="fa fa-ellipsis-v text-white"></i> &nbsp;
+                </div>
+                <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" style="padding:8px 0;">
+                    <a href="#basic_info_@ItemId" data-toggle="tab" class="dropdown-item">
+                        <span><i class="flaticon2-list-3 mr-2"></i>Consignment</span>
+                    </a>
+                    <a href="#denomination_@ItemId" data-toggle="tab" class="dropdown-item">
+                        <span><i class="flaticon2-gear mr-2"></i>Denomination</span>
+                    </a>
+
+                    <a href="#delivery_timeline_@ItemId" data-toggle="tab" class="dropdown-item">
+                        <span class="navi-text">
+                            <i class="flaticon2-time mr-2"></i>Delivery Timeline
+                        </span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+
+                    <a href="#trips_@ItemId" data-toggle="tab" class="dropdown-item">
+                        <span class="navi-text">
+                            <i class="far fa-exchange-alt mr-2"></i>Plan Delivery
+                        </span>
+                    </a>
+                    <a href="#charges_@ItemId" data-toggle="tab" class="dropdown-item">
+                        <span class="navi-text">
+                            <i class="flaticon2-rocket-1 mr-2"></i>Shipment Charges
+                        </span>
+                    </a>
+                    <a @onclick="()=> { }" class="dropdown-item">
+                        <span class="navi-text">
+                            <i class="far fa-times-circle mr-2"></i>Cancel Order
+                        </span>
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <h3 class="card-title">
+        @ShipmentCode
+        <br />
+        <span class="text-muted mt-1 float-left w-100 font-weight-bold font-size-sm">Time: @CreatedAt.ToLocalTime()</span>
+    </h3>
+    <div class="card-toolbar">
+
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ItemId { get; set; }
+
+    [Parameter]
+    public string ShipmentCode { get; set; }
+
+    [Parameter]
+    public DateTime CreatedAt { get; set; }
+}

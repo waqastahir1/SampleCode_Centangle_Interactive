@@ -1,0 +1,227 @@
+﻿@page "/admin/vaults"
+@using SOS.OrderTracking.Web.Shared.ViewModels.Vault
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@using SOS.OrderTracking.Web.Client.Components
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Shared
+ 
+@inherits APICrudBaseV2<VaultViewModel, VaultListViewModel, int, VaultAdditionalValueViewModel, VaultService>
+
+<SubHeader Heading="Manage Vaults" RowsCount="@TotalRows" HideSearch="true">
+    <a @onclick="()=> OnItemClick(0, null, null, null)" class="btn btn-light-warning font-weight-bold ml-2">
+        Create new Vault
+    </a>
+</SubHeader>
+<style>
+    .bg-primary-o-20 {
+        background-color: rgba(250,250,250, 0.5) !important;
+    }
+
+    .items-table tbody tr:nth-child(even) {
+        background: whitesmoke;
+    }
+
+    .items-table tbody tr:nth-child(odd) {
+        background: #FFF
+    }
+
+    .items-table thead tr th {
+        border-bottom: solid 1px #a09f9f !important;
+    }
+</style>
+<div class="row">
+    @{
+        var leftColumnsCount = VaultId > 0 ? 4 : 12;
+    }
+    <div class="col-@leftColumnsCount" style="border-right: 1px #e56464 dotted;">
+        <EditForm Model="this">
+            <div class="row ml-5">
+                <div class="col-md-3 col-sm-6">
+                    <label>Formation Date</label><br /> 
+                    <DatePicker Placeholder="Start Date" @bind-Value="@StartDate" Id="__startDate" />
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <label>Disposal Date</label><br /> 
+                    <DatePicker Placeholder="End Date" @bind-Value="@ThruDate" Id="__endDate" />
+                </div>
+            </div>
+        </EditForm>
+        <FluentCard IsBusy="@IsTableBusy">
+            <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Vault Code</th>
+                        <th>SubRegion</th>
+                        @if (VaultId == 0)
+                        {
+                            <th>Vault Type</th>
+                            <th>Formation Date</th>
+                            <th>Disposal Date</th>
+
+                        }
+                        <th style="width:180px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Items != null)
+                    {
+                        @foreach (var item in Items)
+                        {
+                            var color = item.Id == VaultId ? "600" : "400";
+                            <tr>
+                                <td style="font-weight:@color;" class="pl-4" @onclick="() => { VaultId = item.Id; vaultName = item.Name;  }">@item.Name</td>
+                                <td style="font-weight:@color;" @onclick="() => { VaultId = item.Id; vaultName = item.Name;}">@item.SubRegionName</td>
+                                @if (VaultId == 0)
+                                {
+                                    <td @onclick="() => { VaultId = item.Id; vaultName = item.Name; }">@(EnumHelper.GetDisplayValue(item.OrganizationType))</td>
+                                    <td @onclick="() => { VaultId = item.Id; vaultName = item.Name; }">@item.StartDate.ToString("dd-MM-yyyy")</td>
+                                    <td @onclick="() => { VaultId = item.Id; vaultName = item.Name; }">@item.ThruDate?.ToString("dd-MM-yyyy")</td>
+
+                                }
+                                <td style="padding:2px; text-align:right">
+                                    <a class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;"  @onclick="() => { VaultId = item.Id; vaultName = item.Name; showConsignments = false; }">
+                                        <i class="fas fa-user-friends"></i>
+                                    </a>
+                                    <a class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;" @onclick="() => OnItemClick(item.Id, item.RegionId, item.SubRegionId,null)">
+                                        <i class="flaticon2-pen"></i>
+                                    </a>
+                                    <a class='btn btn-icon btn-light-@(item.HasAccount ? "success": "danger") btn-sm mr-2' style="cursor:pointer;" @onclick="() => OnUserFormClicked(item.Id, item.HasAccount)">
+                                        <i class="fas fa-user-circle"></i>
+                                    </a>
+                                    <a class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;" @onclick="()=> { showConsignments = true; vaultName = item.Name; VaultId = item.Id; }">
+                                        <i class="far fa-line-columns"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <EditForm Model="BaseIndexModel.CurrentIndex">
+                <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+            </EditForm>
+        </FluentCard>
+    </div>
+    @if (VaultId > 0)   
+    {
+        if (showConsignments)
+        {
+            <div class="col-8">
+                <VaultConsignment VaultId="@VaultId" vaultName="@vaultName"></VaultConsignment>
+            </div>
+        }
+        else
+        {
+            <div class="col-8">
+                <VaultMembers Id="@VaultId" vaultName="@vaultName"></VaultMembers>
+            </div>
+        }
+    }
+
+</div>
+
+<InputForm SelectedItem="SelectedItem"
+           IsBusy="IsModalBusy"
+           Heading="Vault Form"
+           Error="@ValidationError"
+           OnCancel="()=> SelectedItem = null"
+           OnValidSubmit="OnFormSubmit">
+
+    @if (SelectedItem != null)
+    {
+        <div class="form-group">
+            <label>Vault Type</label>
+            <Select2 @bind-Value="SelectedItem.VaultTypeId" Datasource="VaultType" Id="_VaultType"></Select2>
+            <ValidationMessage For="() => SelectedItem.VaultTypeId"></ValidationMessage>
+        </div>
+
+        if (SelectedItem.VaultTypeId == 1)
+        {
+            <div class="form-group">
+                <label>Vault Code/Name<b class="text-danger">*</b></label>
+                <input @bind="SelectedItem.Name" type="text" class="form-control" />
+                <ValidationMessage For="() => SelectedItem.Name"></ValidationMessage>
+            </div>
+            <div class="form-group">
+                <label>Region</label>
+                <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                                Data="@Regions" Placeholder="Select a Region" AllowFiltering="true"
+                                TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.RegionId" />
+                <ValidationMessage For="() => SelectedItem.RegionId"></ValidationMessage>
+            </div>
+            <div class="form-group">
+                <label>SubRegion</label>
+                <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                                Data="@SubRegions" Placeholder="Select a Sub-Region" AllowFiltering="true"
+                                TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.SubRegionId" />
+                <ValidationMessage For="() => SelectedItem.SubRegionId"></ValidationMessage>
+            </div>
+            @*<div class="form-group">
+                <label>Vehicle</label>
+                <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                                Data="@Vehicles" Placeholder="Select a Vehicle" AllowFiltering="true"
+                                TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.VehicleId" />
+                <ValidationMessage For="() => SelectedItem.VehicleId"></ValidationMessage>
+            </div>*@
+        }
+        else if (SelectedItem.VaultTypeId == 2)
+        {
+
+            <div class="form-group">
+                <label>Crew/Vehicle</label>
+                <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                                Data="@ActiveCrews" Placeholder="Select a Crew" AllowFiltering="true"
+                                TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.ActiveCrewId" />
+                <ValidationMessage For="() => SelectedItem.ActiveCrewId"></ValidationMessage>
+            </div>
+        }
+        <div class="form-group">
+            <label>Start Date</label><br />
+            <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.StartDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+            <ValidationMessage For="() => SelectedItem.StartDate"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <label>End Date</label><br />
+            <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.ThruDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+            <ValidationMessage For="() => SelectedItem.ThruDate"></ValidationMessage>
+        </div>
+    }
+</InputForm>
+
+<InputForm SelectedItem="@VaultUserViewModel"
+           OnCancel="()=> VaultUserViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="OnUserFormSubmit"
+           Heading="Create User">
+
+    <div class="form-group">
+        <label>User Name</label>
+        <input @bind="VaultUserViewModel.UserName" type="text" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => VaultUserViewModel.UserName"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input @bind="VaultUserViewModel.Password" type="password" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => VaultUserViewModel.Password"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>IMEI Number</label>
+        <InputText @bind-Value="VaultUserViewModel.IMEINumber" type="text" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => VaultUserViewModel.IMEINumber"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <div class="form-group row">
+            <label class="col-4 col-form-label">User Enabled</label>
+            <div class="col-6">
+                <span class="switch switch-outline switch-icon switch-success">
+                    <label>
+                        <input type="checkbox" @bind="VaultUserViewModel.IsEnabled" name="select">
+                        <span></span>
+                    </label>
+                </span>
+            </div>
+        </div>
+    </div>
+</InputForm>

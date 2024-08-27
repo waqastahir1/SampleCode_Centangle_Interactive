@@ -1,0 +1,40 @@
+﻿<div class="tab-pane fade" id="charges_@Item.Id" role="tabpanel" aria-labelledby="charges_@Item.Id">
+    @{
+        var charges = Item.Charges?.ToList();
+    }
+
+    @*@for (int i = 0; i < Item.Charges.Count() / 2; i += 2)*@
+    @for (int i = 0; i < Item.Charges.Count(); i++)
+    {
+        <div class="row m-0">
+
+            <div class="col px-1 py-1 mr-4">
+                <div class="font-size-sm text-muted font-weight-bold">@charges[i].ChargeType</div>
+                <div class="font-size-h6 font-weight-bolder">@charges[i].Amount</div>
+            </div>
+        </div>
+    }
+
+    <hr>
+    <div class="mt-4">
+        <table style="width:70%; margin-left:30%;" class="text-right mb-6">
+            <tr style="border-bottom:1px solid silver;">
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="font-size-h7 font-weight-bolder text-primary mb-0">
+                <td class="font-size-xs text-dark-50 mb-1 pr-1">
+                    TOTAL:
+                </td>
+                <td>
+                    @Item.CurrencySymbol.ToString(). @charges.Sum(x => x.Amount)
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ConsignmentListViewModel Item { get; set; }
+}

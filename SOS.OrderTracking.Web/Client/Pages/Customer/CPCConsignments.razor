@@ -1,0 +1,502 @@
+﻿@page "/customer/cpc-consignments"
+@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared
+
+@inherits APICrudBase<CPCFormViewModel, CPCListViewModel, int>
+
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    .card {
+        box-shadow: 0 3.2px 7.2px 0 rgba(0,0,0,.132), 0 0.6px 1.8px 0 rgba(0,0,0,.108) !important;
+        box-shadow: 0 3.2px 7.2px 0 var(--callout-shadow-color,rgba(0, 0, 0, .132)),0 .6px 1.8px 0 var(--callout-shadow-secondary-color,rgba(0, 0, 0, .108)) !important;
+        height: 32em;
+    }
+
+    .header-fixed.subheader-fixed .header {
+        background-color: white !important;
+    }
+
+    .header-fixed.subheader-fixed .subheader {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .label.label-info {
+        color: #ffffff;
+        background-color: #24a4df;
+    }
+
+    .ps-left-box {
+        background: #c0e5f6;
+        border-radius: 5px;
+        margin-top: 2px !important;
+    }
+
+        .ps-left-box .form-control-solid {
+            background-color: #ffffff !important;
+        }
+
+    .urdu-font {
+        font-family: 'Noto Nastaliq Urdu Draft', serif;
+        font-size: 12px !important
+    }
+
+    .list-item-active {
+        background-color: #fdfeff;
+    }
+
+    .dropdown-toggle::after {
+        content: none !important;
+    }
+
+    .dropdown-toggle::before {
+        content: none !important;
+    }
+
+    .dropdown-toggle {
+        text-decoration: none !important;
+        cursor: pointer;
+        margin: 0 4px !important;
+    }
+
+    .invoice-list .card .card-header {
+        padding: 0.5rem 1rem !important;
+        height: auto !important;
+    }
+
+    .active > span > i {
+        color: white !important;
+    }
+
+    table th, .table td {
+        padding: 0.3rem;
+    }
+
+    .address {
+        border: 1px dashed #eee;
+        background: #fafafa;
+        cursor: pointer;
+    }
+</style>
+
+
+<SubHeader Heading="CIT Consignment" RowsCount="@TotalRows">
+
+    <a @onclick="()=> LoadItems()" class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="fa fa-sync-alt"></i>
+    </a>
+    <a @onclick="()=> OnItemClicked(0)" class="btn btn-danger font-weight-bold ml-2">
+        Create New CPC-Consignment
+    </a>
+</SubHeader>
+
+
+<FluentContent IsBusy="IsTableBusy">
+    <div class="row">
+        @if (Items != null)
+        {
+            @foreach (var item in Items)
+            {
+
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6">
+                    <div class="card card-custom gutter-b">
+                        <ConsignmentHeader ItemId="@item.Id"
+                                           ShipmentCode="@item.ShipmentCode"
+                                           CreatedAt="@item.CreatedAt" />
+                        <div class="card-body pt-4">
+
+                            <div class="tab-content" id="card_tabs_@item.Id">
+                                <ConsignmentInfo item="@item" />
+
+                                <CPCDenomination OnLicked="()=> OnDenominationClicked(item.Id)"
+                                                 Denomination="@item.Denomination"
+                                                 ItemId="@item.Id"
+                                                 Amount="@item.Amount" />
+
+                                <div class="tab-pane fade" id="delivery_timeline_@item.Id" role="tabpanel" aria-labelledby="delivery_timeline_@item.Id">
+
+                                    <div class="timeline timeline-5 mt-8 mb-8">
+                                        <!--begin::Item-->
+                                        <div class="timeline-item align-items-start">
+                                            <!--begin::Label-->
+                                            <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg text-right pr-3">09:27</div>
+                                            <!--end::Label-->
+                                            <!--begin::Badge-->
+                                            <div class="timeline-badge">
+                                                <i class="fa fa-genderless text-success icon-xxl"></i>
+                                            </div>
+                                            <div class="timeline-content d-flex">
+                                                <span class="mr-4 font-weight-bolder text-dark-50">Assigned to crew </span>
+
+                                                <!--begin::Section-->
+                                                <div class="d-flex align-items-start mt-n2">
+                                                    <!--begin::Symbol-->
+                                                    <a href="#" class="symbol symbol-35 symbol-light-success mr-2">
+                                                        <span class="symbol-label">
+                                                            <img src="https://keenthemes.com/metronic/preview/metronic/themes/metronic/theme/html/demo1/dist/assets/media/svg/avatars/004-boy-1.svg" class="h-75 align-self-end" alt="">
+                                                        </span>
+                                                    </a>
+                                                    <a href="#" class="symbol symbol-35 symbol-light-success">
+                                                        <span class="symbol-label">
+                                                            <img src="https://keenthemes.com/metronic/preview/metronic/themes/metronic/theme/html/demo1/dist/assets/media/svg/avatars/011-boy-5.svg" class="h-75 align-self-end" alt="">
+                                                        </span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item align-items-start">
+                                            <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg text-right pr-3">3 hr</div>
+                                            <div class="timeline-badge">
+                                                <i class="fa fa-genderless text-success icon-xxl"></i>
+                                            </div>
+                                            <div class="timeline-content text-dark-50 font-weight-bolder">
+                                                Acknowledged by Crew
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item align-items-start">
+                                            <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg text-right pr-3">09:47</div>
+                                            <div class="timeline-badge">
+                                                <i class="fa fa-genderless text-info icon-xxl"></i>
+                                            </div>
+                                            <div class="timeline-content text-dark-50">
+                                                Crew Reached
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item align-items-start">
+                                            <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg text-right pr-3">--:--</div>
+                                            <div class="timeline-badge">
+                                                <i class="fa fa-genderless text-danger icon-xxl"></i>
+                                            </div>
+                                            <div class="timeline-content text-dark-50">
+                                                Picked Up
+                                            </div>
+                                        </div>
+                                        <div class="timeline-item align-items-start">
+                                            <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg text-right pr-3">--:--</div>
+                                            <div class="timeline-badge">
+                                                <i class="fa fa-genderless text-danger icon-xxl"></i>
+                                            </div>
+                                            <div class="timeline-content text-dark-50">
+                                                In transit
+                                            </div>
+                                        </div>
+                                        <di class="timeline-item align-items-start">
+                                            <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg text-right pr-3">--:--</div>
+                                            <div class="timeline-badge">
+                                                <i class="fa fa-genderless text-danger icon-xxl"></i>
+                                            </div>
+                                            <div class="timeline-content text-dark-50">
+                                                Drop off
+                                            </div>
+                                        </di>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" style="overflow-y:auto;" id="trips_@item.Id" role="tabpanel" aria-labelledby="trips_@item.Id">
+
+                                    <div class="row m-0 address" @onclick="()=> { }">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <div class="font-size-h7 font-dark-50">
+                                                <span class="font-size-lg text-dark-75 font-weight-bold mr-4"> <i class="flaticon2-pin text-warning mr-1"></i>Pickup</span>
+                                                @item.FromPartyCode, @item.FromPartyName,
+                                                @item.FromPartyAddress, @item.FromPartyContact
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row m-0 text-center">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <span class="text-center">
+                                                <i class="far fa-sm fa-ellipsis-v"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="row m-0 address">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <div class="font-size-h7 font-dark-50">
+                                                <span class="font-size-lg text-dark-75 font-weight-bold mr-4"> <i class="flaticon2-pin text-warning mr-1"></i>Dropoff</span>
+                                                @item.ToPartyCode, @item.ToPartyName,
+                                                @item.ToPartyAddress, @item.ToPartyContact
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr style="background-color:#1f7ca7;">
+
+
+                                    <div class="row m-0 text-center mt-4">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <button class="btn btn-xs btn-danger">
+                                                <i class="far fa-sm fa-plus"></i> Click here to add more destinations
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="charges_@item.Id" role="tabpanel" aria-labelledby="charges_@item.Id">
+
+                                    <div class="row m-0">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <div class="font-size-sm text-muted font-weight-bold">Base Charges</div>
+                                            <div class="font-size-h6 font-weight-bolder">$650</div>
+                                        </div>
+                                        <div class="col px-1 py-1">
+                                            <div class="font-size-sm text-muted font-weight-bold">Waiting Chargees</div>
+                                            <div class="font-size-h6 font-weight-bolder">$233,600</div>
+                                        </div>
+                                    </div>
+                                    <div class="row m-0">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <div class="font-size-sm text-muted font-weight-bold">Base Charges</div>
+                                            <div class="font-size-h6 font-weight-bolder">$650</div>
+                                        </div>
+                                        <div class="col px-1 py-1">
+                                            <div class="font-size-sm text-muted font-weight-bold">Waiting Chargees</div>
+                                            <div class="font-size-h6 font-weight-bolder">$233,600</div>
+                                        </div>
+                                    </div>
+                                    <div class="row m-0">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <div class="font-size-sm text-muted font-weight-bold">Base Charges</div>
+                                            <div class="font-size-h6 font-weight-bolder">$650</div>
+                                        </div>
+                                        <div class="col px-1 py-1">
+                                            <div class="font-size-sm text-muted font-weight-bold">Waiting Chargees</div>
+                                            <div class="font-size-h6 font-weight-bolder">$233,600</div>
+                                        </div>
+                                    </div>
+                                    <div class="row m-0">
+                                        <div class="col px-1 py-1 mr-4">
+                                            <div class="font-size-sm text-muted font-weight-bold">Base Charges</div>
+                                            <div class="font-size-h6 font-weight-bolder">$650</div>
+                                        </div>
+                                        <div class="col px-1 py-1">
+                                            <div class="font-size-sm text-muted font-weight-bold">Waiting Chargees</div>
+                                            <div class="font-size-h6 font-weight-bolder">$233,600</div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="mt-4">
+                                        <table style="width:70%; margin-left:30%;" class="text-right mb-6">
+                                            <tr class="font-size-h7 font-weight-bolder text-dark mb-0">
+                                                <td class="font-size-xs text-dark-50 mb-1 pr-1">
+                                                    SUB TOTAL:
+                                                </td>
+                                                <td>
+                                                    Rs. 1790.00
+                                                </td>
+                                            </tr>
+
+                                            <tr class="font-size-h7 font-weight-bolder text-dark mb-0">
+                                                <td class="font-size-xs text-dark-50 mb-1 pr-1">
+                                                    TAXES:
+                                                </td>
+                                                <td>
+                                                    Rs. 790.00
+                                                </td>
+                                            </tr>
+                                            <tr style="border-bottom:1px solid silver;">
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr class="font-size-h7 font-weight-bolder text-primary mb-0">
+                                                <td class="font-size-xs text-dark-50 mb-1 pr-1">
+                                                    TOTAL:
+                                                </td>
+                                                <td>
+                                                    Rs. 2790.00
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <div class="mb-8 ml-4 mr-4">
+        <EditForm Model="CurrentIndex">
+            <PaginationStrip @bind-Value="CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+        </EditForm>
+    </div>
+</FluentContent>
+
+
+<InputForm SelectedItem="SelectedItem"
+           IsBusy="IsModalBusy"
+           Heading="Crew Form"
+           Error="@Error"
+           OnValidSubmit="OnFormSubmit">
+
+    <div class="form-group">
+        <label>Customer</label>
+        <Select2 Datasource="Customers.Select(x=>new SelectListItem() { Text=x.Name, IntValue=x.Id })"
+                 Id="customer_DDL" @bind-Value="CustomerId"></Select2>
+        <ValidationMessage For="() => SelectedItem.CustomerId"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Pickup/From</label>
+        <Select2 Datasource="Branches.Select(x=>new SelectListItem() { Text=x.Name, IntValue=x.Id})"
+                 Id="From_Org_DDL" @bind-Value="SelectedItem.FromPartyId"></Select2>
+        <ValidationMessage For="() => SelectedItem.FromPartyId"></ValidationMessage>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency10x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x10 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency20x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x20 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency50x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x50 Bundles</span></div>
+        </div>
+    </div><div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency75x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x75 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency100x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x100 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency500x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x500 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency1000x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x1000 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="SelectedItem.Currency5000x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x5000 Bundles</span></div>
+        </div>
+    </div>
+</InputForm>
+
+<InputForm SelectedItem="CitDenominationViewModel"
+           IsBusy="IsModalBusy"
+           Heading="Denominations"
+           OnValidSubmit="SaveDenomination">
+
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency10x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x10 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency20x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x20 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency50x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x50 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency75x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x75 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency100x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x100 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency500x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x500 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency1000x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x1000 Bundles</span></div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <InputNumber class="form-control" @bind-Value="CitDenominationViewModel.Currency5000x"></InputNumber>
+            <div class="input-group-append"><span class="input-group-text">x5000 Bundles</span></div>
+        </div>
+    </div>
+
+</InputForm>
+
+<InputForm SelectedItem="DeliveryChargesModel"
+           IsBusy="IsModalBusy"
+           Heading="Consignment Charges"
+           OnValidSubmit="SaveCharges">
+    @*<div class="form-group">
+        <label>Base Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.BaseCharges"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Surcharge</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.Surcharge"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Additional Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.AdditionalCharges"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Seal Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.SealCharges"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Over Time Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.OverTimeCharges"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Distance Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.DistanceCharges"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Extra Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.ExtraCharges"></InputNumber>
+    </div>*@
+    <div class="form-group">
+        <label>Waiting Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.WaitingCharges"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Toll Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.TollCharges"></InputNumber>
+    </div>
+
+</InputForm>
+

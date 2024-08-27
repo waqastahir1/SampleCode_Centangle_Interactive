@@ -1,0 +1,196 @@
+﻿@page "/customshipments"
+@using SOS.OrderTracking.Web.Shared.ViewModels
+@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder.CustomShipment
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Client.Services.Customers
+@inherits APICrudBaseV2<CustomShipmentFormViewModel, CustomShipmentListViewModel, int, CustomShipmentAdditionalValueViewModel, CustomShipmentService>
+@attribute [Authorize]
+<style>
+    tr:hover {
+        background-color: #f0f0ff !important;
+    }
+
+    .checkbox > input:checked ~ span {
+        background-color: #3699FF !important;
+    }
+
+    .checkbox > span {
+        border-radius: 1rem !important;
+    }
+</style>
+<SubHeader Heading="Custom Shipments" RowsCount="@CustomItemsCount" HideSearch="true">
+    <button class="btn btn-primary btn-light-danger mr-2" @onclick="SearchShipments">Search</button>
+    <a href="shipments/0"
+       class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="far fa-table"></i>
+    </a>
+    <a @onclick="SearchShipments" class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="far fa-sync-alt"></i>
+    </a>
+</SubHeader>
+
+<EditForm Model="this" style="margin-left:1rem;">
+    <div class="row">
+        <div class="col-3 text-black bold">
+            <label>Start Date</label><br />
+            <RadzenDatePicker TValue="DateTime?" Placeholder="StartDate" @bind-Value="@StartDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+        </div>
+        <div class="col-3 text-black bold">
+            <label>End Date</label><br />
+            <RadzenDatePicker TValue="DateTime?" Placeholder="EndDate" @bind-Value="@EndDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+        </div>
+        @*<div class="col-3 text-black bold">
+                <div class="form-group">
+                    <label class="">Select All</label><br />
+                    <span class="switch switch-outline switch-icon switch-success">
+                        <label>
+                            <input type="checkbox" @bind="Selected" name="select">
+                            <span></span>
+                        </label>
+                    </span>
+                </div>
+            </div>*@
+        @*<div class="col-3 text-black bold">
+                <button class="btn btn-primary" @onclick="FinalizeShipment">Save</button>
+            </div>*@
+    </div>
+    <div class="row">
+        <div class="col-3 text-black bold">
+            <label>Crew</label><br />
+            <Select2 class="form-control" @bind-Value="@CrewId" Datasource="@Crews" Id="__crew"></Select2>
+            <ValidationMessage For="() => CrewId"></ValidationMessage>
+        </div>
+        <div class="col-3 text-black bold">
+            <label>Consignment State</label><br />
+            <InputSelect class="form-control" @bind-Value="@ConsignmentStateTypeInt" Id="__state">
+                @foreach (var item in ConsignmentStateTypes)
+                {
+                    <option value="@item.IntValue">@item.Text</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => ConsignmentStateTypeInt"></ValidationMessage>
+        </div>
+        <div class="col-3 text-black bold">
+            <label>Consignment Status</label><br />
+            <InputSelect @bind-Value="@ConsignmentStatus" class="form-control">
+                @foreach (var item in Enum.GetValues(typeof(ConsignmentStatus)))
+                {
+                    <option value="@item">@EnumHelper.GetDisplayValue((ConsignmentStatus)item)</option>
+                }
+
+            </InputSelect>
+        </div>
+        <div class="col-3 text-black bold">
+            <label>Posting Message</label><br />
+            <input class="form-control" @bind="@PostingMessage" type="text" />
+            <ValidationMessage For="() => PostingMessage"></ValidationMessage>
+        </div>
+    </div>
+</EditForm>
+
+<FluentCard IsBusy="@IsTableBusy">
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+
+
+    @*@if (Items != null)*@
+    @if (CustomItems != null)
+    {
+        <EditForm Model="Items">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+
+                        <th>
+                            Shipment# <br />
+                            Manual#
+                        </th>
+                        <th style="width:15%;">Pickup Branch</th>
+                        <th style="width:15%;">DropOff Branch</th>
+                        <th style="width:10%;">Crew<br />Bill to</th>
+                        <th>Created by/at</th>
+                        <th>Amount<br />State</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in CustomItems)
+                    {
+                        <tr style='background-color:@(item.Selected?"#eef6ff !important" : "#fff !important")'>
+                            <td>
+                                <div class="checkbox-inline">
+                                    <label class="checkbox checkbox-lg checkbox-outline text-center ml-1 mt-1">
+                                        @if (Selected)
+                                        {
+                                            <input type="checkbox" checked="checked" @bind-value="item.Selected" />
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" @bind-value="item.Selected" />
+                                        }
+                                        <span class="h-20px w-20px"></span>
+                                    </label>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="font-weight-bolder label-dark-75 font-size-sm">@item.ShipmentCode</span> <br />
+                                <span class="font-size-xs">@item.ManualShipmentCode</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bolder label-dark-75 font-size-sm">
+                                    <i class='fa fa-lg fa-@(item.FromPartyGeoStatus == DataRecordStatus.Approved ? "check-circle text-success" : "exclamation-triangle text-warning")'></i>
+                                    @item.FromPartyCode
+                                </span><br />
+                                <span class="font-size-xs">@item.FromPartyName</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bolder label-dark-75 font-size-sm">
+                                    <i class='fa fa-lg fa-@(item.ToPartyGeoStatus == DataRecordStatus.Approved ? "check-circle text-success" : "exclamation-triangle text-warning")'></i>
+                                    @item.ToPartyCode
+                                </span><br />
+                                <span class="font-size-xs">@item.ToPartyName</span>
+                            </td>
+
+                            <td>
+                                <span class="font-weight-bolder label-dark-75 font-size-xs">@item.CrewName</span>
+                                <br />
+
+                                <span class="font-size-xs">@item.BillBranchName</span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bolder label-dark-75 font-size-sm">@item.CreatedAt.GetValueOrDefault().ToString("dd-MM-yyyy")</span>
+                                <br />
+                                <span class="font-size-xs">@item.CreatedBy</span>
+                            </td>
+                            <td style='color:@(item.Amount > 0 && item.Distance > 0 ? "#3fa65e" : "#e68631")'>
+                                <span class="font-weight-bolder label-dark-75 font-size-sm"> @item.Amount.ToString("N0")</span>
+                                <br />
+                                <span class="font-size-xs">@item.ConsignmentStateType (@(Math.Round(item.Distance / 1000,1))km)</span>
+                                <span><i class='fa fa-lg fa-@(item.DistanceStatus == DataRecordStatus.Approved ? "check-circle text-success" : "exclamation-triangle text-warning")'></i></span>
+                            </td>
+
+                            <td width="150">
+                                <InputSelect @bind-Value="@item.ShipmentType" class="form-control">
+                                    @foreach (var item in Enum.GetValues(typeof(ShipmentType)))
+                                            {
+                                                if ((ShipmentType)item > ShipmentType.Unknown)
+                                                {
+                                            <option value="@item">@item</option>
+                                                }
+                                            }
+
+                                </InputSelect>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </EditForm>
+    }
+</FluentCard>

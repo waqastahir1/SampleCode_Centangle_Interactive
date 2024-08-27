@@ -1,0 +1,197 @@
+﻿@using SOS.OrderTracking.Web.Portal.Components
+@using SOS.OrderTracking.Web.Shared.StaticClasses
+
+@*<AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, SOS-Headoffice-Billing">
+    <div class="form-group">
+        <label>Manual Shipment Code</label>
+        <input type="text" placeholder="Optional" class="form-control" @bind="@SelectedItem.ManualShipmentCode">
+        <ValidationMessage For="() => SelectedItem.ManualShipmentCode"></ValidationMessage>
+    </div>
+</AuthorizeView>*@
+
+<div class="form-group">
+    <label>Pickup/From</label>
+    @if (SelectedItem.TransactionMode == 1)
+    {
+        <br>
+        <input type='hidden' @bind-value="OrganizationalUnit.PartyId" Id="FromPartyId" />
+        <strong>@OrganizationalUnit.PartyName</strong>
+    }
+    else
+    {
+        <Select2Ajax AjaxUrl="v1/Organization/SearchBranches" Text="@SelectedItem.FromPartyName"
+                 Id="FromPartyId" @bind-Value="SelectedItem.FromPartyId"></Select2Ajax>
+        <ValidationMessage For="() => SelectedItem.FromPartyId"></ValidationMessage>
+    }
+</div>
+<div class="form-group">
+    <label>Dropoff/To</label>
+    @if (SelectedItem.TransactionMode != 2)
+    {
+        <Select2Ajax AjaxUrl="v1/Organization/SearchBranches" Text="@SelectedItem.ToPartyName"
+                 Id="ToPartyId" @bind-Value="SelectedItem.ToPartyId"></Select2Ajax>
+        <ValidationMessage For="() => SelectedItem.ToPartyId"></ValidationMessage>
+    }
+    else
+    {
+        <br>
+        <input type='hidden' @bind-value="OrganizationalUnit.PartyId" Id="ToPartyId" />
+        <strong>@OrganizationalUnit.PartyName</strong>
+    }
+</div>
+<div class="form-group" style='height:64px; display:block;'>
+    <label>Bill To </label>
+
+    @if (SearchAll)
+    {
+        <label class=' float-right font-weight-bold' @onclick='()=> SearchAll = !SearchAll'>Search all branches</label>
+        <label class="checkbox checkbox-md checkbox-light-dark checkbox-inline flex-shrink-0 float-right mr-7 ml-2 mb-8">
+            <input type="checkbox" checked='checked' @onclick='()=> SearchAll = !SearchAll'>
+            <span></span>
+        </label>
+
+        <Select2Ajax AjaxUrl="v1/Organization/SearchBranches" Text="@SelectedItem.BillBrannchName" Id1="FromPartyId" Id2="ToPartyId"
+                 Id="BillBranchId" @bind-Value="SelectedItem.BillBranchId"></Select2Ajax>
+    }
+    else
+    {
+        <label class=' float-right font-weight-bold' @onclick='()=> SearchAll = !SearchAll'>Search all branches</label>
+        <label class="checkbox checkbox-md checkbox-light-dark checkbox-inline flex-shrink-0 float-right mr-7 ml-2 mb-8">
+            <input type="checkbox" @onclick='()=> SearchAll = !SearchAll'>
+            <span></span>
+        </label>
+
+        <Select2Ajax AjaxUrl="v1/Organization/SearchSiblingBranches" Text="@SelectedItem.BillBrannchName" Id1="FromPartyId" Id2="ToPartyId"
+                 Id="BillBranchId" @bind-Value="SelectedItem.BillBranchId"></Select2Ajax>
+    }
+    <ValidationMessage For="() => SelectedItem.BillBranchId"></ValidationMessage>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="form-group">
+            <label>Sealed bags</label>
+            <div>
+                <span class="switch switch-danger">
+                    <label>
+                        <input type="checkbox" @bind="SelectedItem.SealedBags" name="select">
+                        <span></span>
+                    </label>
+                </span>
+            </div>
+            @if (SelectedItem.SealedBags)
+            {
+                <strong class="text-primary">Crew will be handed over pre-sealed bags.</strong>
+            }
+            else
+            {
+                <strong class="text-dark-50">Crew will verifyy the cash and apply seals.</strong>
+            }
+
+        </div>
+    </div>
+
+    @*    <div class="col-6">
+    <div class="form-group">
+    <label>Include Cash Processing</label>
+    <div>
+    <span class="switch switch-danger">
+    <label>
+    <input type="checkbox" @bind="SelectedItem.IncludeCashProcessing" name="select">
+    <span></span>
+    </label>
+    </span>
+    </div>
+
+    </div>
+    </div>*@
+</div>
+
+<div class="form-group">
+    <label>Shipment Mode</label>
+    <InputSelect class="form-control" @bind-Value="SelectedItem.ServiceType">
+        <option value="@ServiceType.ByRoad">By Road</option>
+        <option value="@ServiceType.ByAir">By Air</option>
+    </InputSelect>
+    <ValidationMessage For="() => SelectedItem.ServiceType"></ValidationMessage>
+</div>
+<div class="form-group">
+    <label>Currency</label>
+    <InputSelect class="form-control" @bind-Value="SelectedItem.CurrencySymbol">
+        <option value="@CurrencySymbol.PKR">PKR</option>
+        <option value="@CurrencySymbol.USD">USD</option>
+        <option value="@CurrencySymbol.EURO">EURO</option>
+        <option value="@CurrencySymbol.MixCurrency">Mix Currency</option>
+        <option value="@CurrencySymbol.PrizeBond">Prize Bond</option>
+        <option value="@CurrencySymbol.Other">Other</option>
+    </InputSelect>
+    <ValidationMessage For="() => SelectedItem.CurrencySymbol"></ValidationMessage>
+</div>
+@if (SelectedItem.CurrencySymbol == CurrencySymbol.PrizeBond ||SelectedItem.CurrencySymbol == CurrencySymbol.USD || SelectedItem.CurrencySymbol == CurrencySymbol.EURO || SelectedItem.CurrencySymbol == CurrencySymbol.PKR)
+{
+    <div class="form-group">
+        <label>Amount</label>
+        <InputNumber class="form-control" @bind-Value="SelectedItem.Amount"></InputNumber>
+        <ValidationMessage For="() => SelectedItem.Amount"></ValidationMessage>
+    </div>
+    if (SelectedItem.CurrencySymbol == CurrencySymbol.PrizeBond || SelectedItem.CurrencySymbol == CurrencySymbol.PKR)
+    {
+        SelectedItem.Valueables = null;
+        SelectedItem.AmountPKR = SelectedItem.Amount;
+        SelectedItem.ExchangeRate = 1;
+    }
+}
+@if (SelectedItem.CurrencySymbol == CurrencySymbol.USD || SelectedItem.CurrencySymbol == CurrencySymbol.EURO)
+{
+    var AmountInWords = CurrencyHelper.AmountInWords(SelectedItem.Amount);
+    SelectedItem.Valueables = null;
+    <div class="form-group">
+        <label>Exchange Rate</label>
+        <input type="number" step="any" class="form-control" @bind-value="SelectedItem.ExchangeRate" @bind-value:event="oninput">
+        <ValidationMessage For="() => SelectedItem.ExchangeRate"></ValidationMessage>
+    </div>
+    decimal exchangeRate = 1;
+    if (SelectedItem.ExchangeRate > 1)
+        exchangeRate = SelectedItem.ExchangeRate;
+    SelectedItem.AmountPKR = Convert.ToInt32(SelectedItem.Amount * exchangeRate);
+    <div class="form-group">
+        <label>AmountPKR</label>
+        <label class="form-control">@SelectedItem.AmountPKR</label>
+        <ValidationMessage For="() => SelectedItem.AmountPKR"></ValidationMessage>
+    </div>
+
+
+    <div class="form-group">
+        <div class="input-group">
+            <textarea class="form-control font-weight-bolder text-dark font-size-h7" @bind="@AmountInWords"></textarea>
+        </div>
+    </div>
+
+}
+@if (SelectedItem.CurrencySymbol == CurrencySymbol.MixCurrency || SelectedItem.CurrencySymbol == CurrencySymbol.Other)
+{
+    var AmountInWordsPKR = CurrencyHelper.AmountInWords(SelectedItem.Amount);
+    SelectedItem.AmountPKR = SelectedItem.Amount;
+    SelectedItem.ExchangeRate = 1;
+
+    <div class="form-group">
+        <label>Net Worth PKR</label>
+        <input type="number" class="form-control" @bind-value="SelectedItem.Amount" @bind-value:event="oninput">
+    </div>
+
+}
+
+
+<div class="form-group">
+    <label>Comments</label>
+    @if (SelectedItem.ConsignmentStatus.HasFlag(Web.Shared.Enums.ConsignmentStatus.InvalidShipment))
+    {
+    <textarea disabled class="form-control" @bind="@SelectedItem.Comments"></textarea>
+    }
+    else
+    {
+    <textarea class="form-control" @bind="@SelectedItem.Comments"></textarea>
+    }
+</div>
+
+

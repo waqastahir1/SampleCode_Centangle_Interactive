@@ -1,0 +1,320 @@
+﻿@page "/Shipments/Vault/Report"
+@using SOS.OrderTracking.Web.Portal.Components
+@using global::SOS.OrderTracking.Web.Shared.ViewModels.Vault
+
+@inherits CrudBase<ShipmentVaultReportFormViewModel, ShipmentVaultReportListViewModel, int>
+
+
+<SubHeader Heading="Vault Report" RowsCount="@TotalRows" HideSearch="true">
+    @*    <div class="d-flex align-items-center">
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, BankBranch,BankHybrid, BankBranchManager, BankCPC, BankCPCManager">
+    <a href="shipments/2"
+    class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+    <!--!-->
+    <i class="far fa-line-columns"></i>
+    </a>
+    </AuthorizeView>
+    <a href="shipments/0"
+    class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+    <!--!-->
+    <i class="far fa-table"></i>
+    </a>
+    </div>*@
+</SubHeader>
+<EditForm Model="@this" style="margin-left:1rem;">
+    <div class="row">
+        <div class="col-md-2">
+            <label>From Date</label><br />
+            <InputDate @bind-Value='FromDate' class='form-control'></InputDate>
+            @*
+            <DatePicker Id="__fromDate" @bind-Value="FromDate" Placeholder="From Date">
+            </DatePicker> *@
+        </div>
+        <div class="col-md-2">
+            <label>Thru Date</label><br />
+            <InputDate @bind-Value='ThruDate' class='form-control'></InputDate>
+            @*
+            <DatePicker Id="__toDate" @bind-Value="ThruDate" Placeholder="Thru Date">
+            </DatePicker> *@
+        </div>
+        <div class="col-3 text-black bold">
+            <label>Consignment State</label><br />
+            <InputSelect class="form-control" TValue="ConsignmentDeliveryState"
+                         @bind-Value="@ConsignmentDeliveryState">
+                @foreach (var item in ConsignmentStateSummarizedTypes)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </InputSelect>
+        </div>
+
+        <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+            <div class="col-3  text-black bold">
+                <label>Customer</label>
+                <Select2 Datasource="MainCustomers" @bind-Value="MainCustomerId" Id="_customer"></Select2>
+            </div>
+        </AuthorizeView>
+
+        <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+            <div class="col-md-3 col-lg-3 col-xl-3">
+                <label>Branch</label><br />
+                <Select2Ajax AjaxUrl="v1/Common/SearchCustomers"
+                             Id="billBranchId" @bind-Value="BranchId"></Select2Ajax>
+            </div>
+            <div class="col-md-3 text-black bold">
+                <label>Consignment Status</label><br />
+                <InputSelect class="form-control" TValue="Web.Shared.Enums.ConsignmentStatus"
+                             @bind-Value="@ConsignmentStatus">
+                    @foreach (var item in ConsignmentStatusTypes)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => ConsignmentStatus"></ValidationMessage>
+            </div>
+        </AuthorizeView>
+
+        <div class="col-3 text-black bold">
+            <label>Vault Status</label><br />
+            <InputSelect class="form-control" TValue="int"
+                         @bind-Value="@VaultStatusId">
+                @foreach (var item in VaultStatus)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </InputSelect>
+        </div>
+        <div class="col-md-2">
+
+            <br />
+            <div class="btn-group">
+                <button type="button" class="btn btn-light-primary " @onclick="async ()=> await ShowData()">
+                    <span class='m-0 p-0'><i class='@(IsTableBusy ? "fa fa-sync fa-spin m-0 p-0" : "")'></i></span> &nbsp; Show Report
+                </button>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                @{
+                    string pdf = "pdf"; string excel = "xls"; string csv = "csv";
+                }
+                <div class="dropdown-menu min-w-1px">
+                    <a class="dropdown-item" @onclick="async ()=> await DownloadPdf(pdf)"><span class=""><i class="fas fa-file-pdf "></i> Download Pdf</span></a>
+                    <a class="dropdown-item" @onclick="()=>DownloadPdf(csv)"><span class=""><i class="fas fa-file-csv"></i> Download CSV</span></a>
+                    <a class="dropdown-item" @onclick="()=>DownloadPdf(excel)"><span class=""><i class="fas fa-file-excel"></i> Download Excel</span></a>
+                </div>
+            </div>
+        </div>
+        @*style="color:#F64E60;"*@
+        <div class="row">
+            <div class="col-12">
+                <hr />
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<FluentCard IsBusy="@IsTableBusy">
+
+    @if (Items == null)
+    {
+        <h5>Select options and click show data</h5>
+        @if (IsModalBusy)
+        {
+            <div class="overlay-layer rounded bg-primary-o-20">
+                <div class="spinner spinner-primary"></div>
+            </div>
+        }
+    }
+    else
+    {
+        if (Items.Count() == 0)
+        {
+            <h4 style="text-align:center; margin:auto;margin-top:150px;">
+                No Consignment found<br />
+                @*<a class="btn btn-secondary font-weight-bold mt-4">
+        No Consignment found
+        </a>*@
+            </h4>
+        }
+        else
+        {
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Client Name
+                        </th>
+                        <th>
+                            Station
+                        </th>
+                        <th>
+                            Collection Branch
+                        </th>
+                        <th>
+                            Pickup Time
+                        </th>
+
+                        <th>
+                            Delivery Branch
+                        </th>
+                        <th>
+                            Shipment No
+                        </th>
+                        <th>
+                            No.Of Seals
+                        </th>
+
+                        <th>
+                            No.Of Bags
+                        </th>
+
+                        <th>
+                            Shipment Amount
+                        </th>
+
+                        <th>
+                            Collection Vehicle
+                        </th>
+
+                        <th>
+                            Collection Crew
+                        </th>
+                        <th>
+                            Vault In Vehicle
+                        </th>
+
+                        <th>
+                            Vault Location
+                        </th>
+                        <th>
+                            Vault In Time
+                        </th>
+                        <th>
+                            Shipment Scan
+                        </th>
+
+                        <th>
+                            Vault Out Time
+                        </th>
+
+                        <th>
+                            Vault Out Vehicle
+                        </th>
+
+                        <th>
+                            Vault Out Crew
+                        </th>
+
+                        <th>
+                            Delivery Time
+                        </th>
+
+                        <th>
+                            Dropoff Vehicle
+                        </th>
+
+                        <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+
+                            <th>
+                                State
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                        </AuthorizeView>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Items)
+                    {
+                        <tr>
+                            <td>
+                                @item.Client
+                            </td>
+                            <td>
+                                @item.CollectionDelivery?.Station
+                            </td>
+                            <td>
+                                @item.PickupBranch
+                            </td>
+                            <td>
+                                @item.CollectionDelivery?.ActualPickupTime
+                            </td>
+
+                            <td>
+                                @item.DeliveryBranch
+                            </td>
+
+                            <td>
+                                @item.ShipmentCode
+                            </td>
+                            <td>
+                                @item.SealCount
+                            </td>
+                            <td>
+                                @item.BagsCount
+                            </td>
+
+                            <td>
+                                @item.AmountStr
+                            </td>
+
+                            <td>
+                                @item.CollectionDelivery?.Vehicle
+                            </td>
+                            <td>
+                                @item.CollectionDelivery?.Crew
+                            </td>
+                            <td>
+                                @item.VehicleIn
+                            </td>
+                            <td>
+                                @item.VaultType
+                            </td>
+                            <td>
+                                @item.VaultInTime
+                            </td>
+                            <td>
+                                @item.ShipmentScan
+                            </td>
+
+                            <td>
+                                @item.VaultOutTime
+                            </td>
+
+                            <td>
+                                @item.VehicleOut
+                            </td>
+
+                            <td>
+                                @item.VaultOutCrew
+                            </td>
+
+                            <td>
+                                @item.DroppoffDelivery?.ActualDropTime
+                            </td>
+
+                            <td>
+                                @item.DroppoffDelivery?.Vehicle
+                            </td>
+
+                            <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                                <td>
+                                    @item.ConsignmentState
+                                </td>
+                                <td>
+                                    @item.ConsignmentStatus
+                                </td>
+                            </AuthorizeView>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+    <EditForm Model="@PaginationStrip.CurrentIndex">
+        <PaginationStrip @bind-Value="PaginationStrip.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>

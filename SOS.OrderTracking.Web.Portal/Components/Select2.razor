@@ -1,0 +1,24 @@
+﻿@typeparam TValue
+@inherits InputBase<TValue>
+
+<select id="@Id" class="form-control select2 w-100 opacity-100">
+
+    @if (Datasource != null)
+    {
+        if (ShowDefaultOption)
+        {
+            <option value="">Select an Option</option>
+        }
+
+        foreach (var item in Datasource.Where(x => x != null))
+        {
+            <option value="@item.Value" selected="@(item.Value?.ToString() == CurrentValue?.ToString())">
+                @((MarkupString)@item.Text)
+            </option>
+        }
+    }
+    else
+    {
+        <option value="">---</option>
+    }
+</select>

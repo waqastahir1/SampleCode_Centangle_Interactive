@@ -1,0 +1,17 @@
+﻿@page "/shipments/{Type:int}"
+@using SOS.OrderTracking.Web.Client.CIT.Shipments 
+@using SOS.OrderTracking.Web.Client.Pages.Customer
+
+
+@if (Type == 4)
+{
+    <CitFinalizeConsignments></CitFinalizeConsignments>
+}
+else if (Type == 3)
+{
+    <CustomerReport></CustomerReport>
+}
+else
+{
+    <LiveShipments SearchKey="@ShipmentCode" ConsignmentType="@(Type == 0? ShipmentExecutionType.Live : ShipmentExecutionType.Scheduled)"></LiveShipments>
+} 

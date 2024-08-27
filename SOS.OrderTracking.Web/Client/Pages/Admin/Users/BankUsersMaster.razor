@@ -1,0 +1,133 @@
+﻿@page "/admin/bankusers"
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@using SOS.OrderTracking.Web.Shared
+@using SOS.OrderTracking.Web.Shared.ViewModels.Branches
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Shared.ViewModels.BankUser
+
+@inherits APICrudBaseV2<BankUserFormViewModel, BankUserListViewModel, string, BankUsersAdditionalValueViewModel, BankUserService>
+@attribute [Authorize(Roles = "SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin")]
+
+
+<SubHeader Heading="Manage Branches" RowsCount="@TotalRows" HideSearch="true">
+    @*<a class="btn btn-light-warning font-weight-bold ml-2">
+            Create new Branch
+        </a>*@
+</SubHeader>
+<style>
+    .bg-primary-o-20 {
+        background-color: rgba(250,250,250, 0.5) !important;
+    }
+
+    .items-table tbody tr:nth-child(even) {
+        background: whitesmoke;
+        cursor: pointer;
+    }
+
+    .items-table tbody tr:nth-child(odd) {
+        background: #FFF;
+        cursor: pointer;
+    }
+
+    .items-table thead tr th {
+        border-bottom: solid 1px #a09f9f !important;
+    }
+
+    .border-right-dotted {
+        border-right: 1px #e56464 dotted;
+    }
+</style>
+<FluentCard IsBusy="@IsTableBusy">
+<div class="row">
+   <div class="col-@(BankBranchId == 0? 12 : 5)">
+        <EditForm Model="this">
+        <div class="row">
+            <div class="col-3">
+                <label>Customer</label>
+                <Select2 Datasource="MainCustomers" @bind-Value="MainCustomerId" Id="_customer"></Select2>
+            </div>
+        </div>
+    </EditForm>
+
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Branch Code</th>
+                <th>Branch Name</th>
+                <th>Initiators</th>
+                <th>Supervisors</th> 
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items is not null)
+            {
+                foreach (var item in Items)
+                {
+                  
+                    <tr @onclick="()=> {BankBranchId = item.PartyId; BranchCode = item.BranchCode;}">
+                        <td>
+                            @item.BranchCode
+                        </td>
+                        <td>
+                            @item.BranchName
+                        </td>
+                        <td>
+                               <span class="label label-lg label-light-@(item.Users.Count(x=>Constants.Roles.Initiators.Contains(x)) == 0 ?"danger": "success") label-inline"> 
+                          @item.Users.Count(x=>Constants.Roles.Initiators.Contains(x))</span>
+                        </td>
+                        <td>
+                              <span class="label label-lg label-light-@(item.Users.Count(x=>Constants.Roles.Supervisors.Contains(x)) == 0 ?"danger": "success") label-inline"> 
+                          @item.Users.Count(x=>Constants.Roles.Supervisors.Contains(x))</span>
+                           
+                        </td>
+                         
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+
+   </div>
+    @if (BankBranchId > 0)
+    {
+        <div class="col-7">
+            <BankUsersDetail BankBranchId="@BankBranchId" BranchCode="@BranchCode" ></BankUsersDetail>
+        </div>
+    }
+    </div>
+</FluentCard>
+
+<InputForm SelectedItem="@SelectedItem"
+           OnCancel="()=> SelectedItem = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="OnFormSubmit"
+           Heading="User Form">
+    @if (RoleType == 1)
+    {
+        <div class="form-group">
+            <label>User Name</label>
+            <input class="form-control" @bind="SelectedItem.SupervisorUserName" />
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input class="form-control" @bind="SelectedItem.SupervisorEmail" type="email" />
+        </div>
+    }
+    else
+    {
+        <div class="form-group">
+            <label>User Name</label>
+            <input class="form-control" @bind="SelectedItem.InitiatorUserName" />
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input class="form-control" @bind="SelectedItem.InitiatorEmail" type="email" />
+        </div>
+    }
+</InputForm>

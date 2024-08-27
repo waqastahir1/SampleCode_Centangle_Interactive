@@ -1,0 +1,13 @@
+@page "/authentication/{action}"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@if (Action == "logged-out")
+{
+    <Index></Index>
+}
+else
+{
+<RemoteAuthenticatorView Action="@Action" />
+}
+@code{
+    [Parameter] public string Action { get; set; }
+}

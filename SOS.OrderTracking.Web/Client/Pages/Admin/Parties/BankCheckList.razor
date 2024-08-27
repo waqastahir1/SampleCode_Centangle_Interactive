@@ -1,0 +1,168 @@
+﻿@page "/admin/bankchecklist"
+@using SOS.OrderTracking.Web.Shared.ViewModels.ATM
+@using SOS.OrderTracking.Web.Client.Components
+@using Radzen.Blazor
+@inherits APICrudBase<CheckListFormViewModel, CheckListListViewModel, int>
+
+<div class="subheader py-2 py-lg-4  subheader-solid" id="kt_subheader">
+    <div class=" container-fluid  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                ATM CheckList
+            </h5>
+            <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-5 bg-gray-200"></div>
+            <div class="d-flex align-items-center" id="kt_subheader_search">
+                <span class="text-dark-50 font-weight-bold" id="kt_subheader_total">
+                    @TotalRows Total
+                </span>
+                @*<form class="ml-5">
+                        <div class="input-group input-group-sm input-group-solid" style="max-width: 175px">
+                            <input type="text" class="form-control" id="kt_subheader_search_form" placeholder="Search...">
+                            <div class="input-group-append">
+                                <span class="input-group-text">
+                                    <span class="svg-icon">
+                                        <i class="fal fa-search"></i>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </form>*@
+                <EditForm Model="@this">
+                    <div class="ml-5">
+                        @*<Select2Ajax AjaxUrl="v1/Common/SearchCustomers"
+                            Id="__bank" @bind-Value="BankId"></Select2Ajax>*@
+                        @*<Select2 @bind-Value="BankId" Datasource="Banks" Id="__bank" />*@
+                    </div>
+                    @*<AutoComplete Id="tags" @bind-Value="SelectedFilm"></AutoComplete>*@
+                </EditForm>
+            </div>
+        </div>
+        <h3>AutoComplete with custom filtering</h3>
+        <RadzenAutoComplete Data="@Customers" TextProperty="Text" Value="BankId"
+                            LoadData="@LoadData" />
+        @*Change="@(args => Change(args, "AutoComplete with custom filtering"))"*@
+        @*<SfAutoComplete TItem="examp" TValue="string" DataSource="vals" Placeholder="here we go..">
+                <AutoCompleteFieldSettings Value="name"></AutoCompleteFieldSettings>
+            </SfAutoComplete>
+            @code{
+                public class examp
+                {
+                    public string name { get; set; }
+                }
+                public List<examp> vals = new List<examp>{
+                    new examp() { name = "v1"},
+                        new examp() { name ="v2"},
+                            new examp() { name ="v3"},
+                                new examp() { name ="v4"}
+                };
+            }*@
+        <div class="d-flex align-items-center">
+            <a @onclick="()=> OnItemClicked(0)" class="btn btn-light-warning font-weight-bold ml-2">
+                Add Item In CheckList
+            </a>
+        </div>
+    </div>
+</div>
+
+<FluentCard IsBusy="@IsTableBusy">
+    <Notification Content="@Error"
+                  Type="NotificationCssClass.Danger"></Notification>
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Bank CheckList Id</th>
+                <th>Feature Description</th>
+                <th></th>
+                <th style="padding:2px; text-align:left">Active/NotActive</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items != null)
+            {
+                @foreach (var item in Items)
+                {
+                    <tr>
+                        <td>
+                            @item.Id
+                        </td>
+                        <td>@item.Feature</td>
+                        <td></td>
+                        <td style="padding:2px; text-align:left">
+                            @if (item.isActive)
+                            {
+                                <div class="checkbox-inline">
+                                    <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                                        <input type="checkbox" checked="checked" @onchange="(e) => MarkAsActive(e, item.Id)" />
+                                        <span></span>
+                                    </label>
+                                </div>
+                                @*<Input type="checkbox" class="btn btn-icon btn-light-danger btn-sm mr-2" checked="checked" style="cursor:pointer;" @onchange="(e) => MarkAsActive(e, item.Id)" />*@
+                            }
+                            else
+                            {
+                                <div class="checkbox-inline">
+                                    <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                                        <input type="checkbox" @onchange="(e) => MarkAsActive(e, item.Id)" />
+                                        <span></span>
+                                    </label>
+                                </div>
+                                @*<Input type="checkbox" class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;" @onchange="(e) => MarkAsActive(e, item.Id)" />*@
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+    <EditForm Model="CurrentIndex">
+        <PaginationStrip @bind-Value="CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>
+
+<InputForm Id="form1"
+           SelectedItem="SelectedItem"
+           IsBusy="IsModalBusy"
+           Heading="Customer Form"
+           OnCancel="()=> SelectedItem = null"
+           OnValidSubmit="OnFormSubmit">
+    @if (SelectedItem != null)
+    {
+        <div class="form-group">
+            <label>Select Bank<b class="text-danger"></b></label>
+            @*<Select2Ajax AjaxUrl="v1/Common/SearchCustomers"
+                Id="_banks" @bind-Value="SelectedItem.BankId"></Select2Ajax>*@
+            <RadzenAutoComplete Data="@Customers" TextProperty="Text" @bind-Value="SelectedItem.BankId" Style="width:100%;"
+                                LoadData="@LoadData" />
+            @*<BlazoredTypeahead SearchMethod="SearchValues"
+                                   @bind-Value="SelectedValue">
+                    <SelectedTemplate>
+                        @context.Text
+                    </SelectedTemplate>
+                    <ResultTemplate>
+                        @context.Text
+                    </ResultTemplate>
+                </BlazoredTypeahead>*@
+        </div>
+        //if (SelectedValue != null)
+        //{
+        //    SelectedItem.BankId = SelectedValue.Value;
+        //}
+
+        <div class="form-group">
+            <label>Feature to be repair<b class="text-danger"></b></label>
+            <Select2 @bind-Value="SelectedItem.featureId" Datasource="checkList" Id="___bank" />
+            <ValidationMessage For="() => SelectedItem.Feature"></ValidationMessage>
+        </div>
+
+        @*<div class="form-group">
+                <label>Select Bank<b class="text-danger"></b></label>
+
+                <Select2 @bind-Value="SelectedItem.BankId" Datasource="Banks" Id="_feature">
+                    <option value="0">All</option>
+                </Select2>
+            </div>*@
+    }
+</InputForm>
+

@@ -1,0 +1,435 @@
+﻿@using SOS.OrderTracking.Web.Shared.StaticClasses
+@using SOS.OrderTracking.Web.Common.Data
+@using SOS.OrderTracking.Web.Shared.CIT.Shipments
+@using Radzen.Blazor
+
+
+@if (CitDenominationViewModel.FinalizeShipment && DedicatedVehicles != null && DedicatedVehicles.Count > 0)
+{
+    <div class="form-group">
+        <label>Select Vehicle:</label><br />
+        <RadzenDropDown AllowClear="true" TValue="int" class="form-control"
+                        Data="@DedicatedVehicles" Placeholder="Select vehicle" AllowFiltering="true"
+                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="CitDenominationViewModel.DedicatedVehicle" />
+    </div>
+}
+
+@if (CitDenominationViewModel.FinalizeShipment)
+{
+    <div class="form-group">
+        <label>Currency</label>
+        <InputSelect class="form-control" @bind-Value="CitDenominationViewModel.CurrencySymbol">
+            <option value="@CurrencySymbol.PKR">PKR</option>
+            <option value="@CurrencySymbol.USD">USD</option>
+            <option value="@CurrencySymbol.EURO">EURO</option>
+            <option value="@CurrencySymbol.MixCurrency">Mix Currency</option>
+            <option value="@CurrencySymbol.PrizeBond">Prize Bond</option>
+            <option value="@CurrencySymbol.Other">Other</option>
+        </InputSelect>
+        <ValidationMessage For="() => CitDenominationViewModel.CurrencySymbol"></ValidationMessage>
+    </div>
+}
+@if (CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PKR || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PrizeBond || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.USD || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.EURO)
+{
+    <div class="form-group">
+        <label>Cash Unit</label>
+        <InputSelect class="form-control" @bind-Value="CitDenominationViewModel.Type">
+            <option value="@DenominationType.Leafs">Leafs</option>
+            <option value="@DenominationType.Packets">Packets</option>
+            <option value="@DenominationType.Bundles">Bundles</option>
+        </InputSelect>
+        <ValidationMessage For="() => CitDenominationViewModel.Type"></ValidationMessage>
+    </div>
+}
+@if (CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PrizeBond)
+{
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                @*<input type="number" class="form-control" disabled style="color: #464E5F; background-color: #F3F6F9;" placeholder="Bonds">*@
+                <div class="form-control" style="color: #464E5F; background-color: #F3F6F9;"><span>No. Of Bonds</span></div>
+                <div class="input-group-append"><span class="input-group-text">x Denom</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <div class="form-control" style="color: #464E5F; background-color: #F3F6F9;"><span>Prize Money</span></div>
+                <div class="input-group-append"><span class="input-group-text">= Total</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency100x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x100</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney100x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(100, CitDenominationViewModel.Currency100x, CitDenominationViewModel.PrizeMoney100x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency200x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x200</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney200x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(200, CitDenominationViewModel.Currency200x, CitDenominationViewModel.PrizeMoney200x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency750x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x750</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney750x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(750, CitDenominationViewModel.Currency750x, CitDenominationViewModel.PrizeMoney750x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency1500x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x1500</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney1500x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(1500, CitDenominationViewModel.Currency1500x, CitDenominationViewModel.PrizeMoney1500x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency7500x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x7500</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney7500x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(7500, CitDenominationViewModel.Currency7500x, CitDenominationViewModel.PrizeMoney7500x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency15000x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x15000</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney15000x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(15000, CitDenominationViewModel.Currency15000x, CitDenominationViewModel.PrizeMoney15000x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency25000x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x25000</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney25000x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(25000, CitDenominationViewModel.Currency25000x, CitDenominationViewModel.PrizeMoney25000x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-12">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency40000x" placeholder="Bonds" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x40000</span></div>
+                <div class="input-group-append"><span class="input-group-text">+</span></div>
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.PrizeMoney40000x" placeholder="Prize Money" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">= @(CurrencyHelper.PrizeBondFormula(40000, CitDenominationViewModel.Currency40000x, CitDenominationViewModel.PrizeMoney40000x, CitDenominationViewModel.Type).GetValueOrDefault())</span></div>
+            </div>
+        </div>
+    </div>
+
+}
+else if (CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PKR || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.USD || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.EURO)
+{
+    <div class="row">
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency1x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x1</span></div>
+            </div>
+        </div>
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency2x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x2</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency5x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x5</span></div>
+            </div>
+        </div>
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency10x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x10</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency20x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x20</span></div>
+            </div>
+        </div>
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency50x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x50</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency75x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x75</span></div>
+            </div>
+        </div>
+
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency100x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x100</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency500x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x500</span></div>
+            </div>
+        </div>
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency1000x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x1000</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group col-6">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="CitDenominationViewModel.Currency5000x" @bind-value:event="oninput">
+                <div class="input-group-append"><span class="input-group-text">x5000</span></div>
+            </div>
+        </div>
+    </div>
+    <hr />
+}
+else
+{
+    if (!IsChanged)
+    {
+        AmountPKR = CitDenominationViewModel.AmountPKR;
+        IsChanged = true;
+    }
+    var AmountInWordsPKR = CurrencyHelper.AmountInWords(AmountPKR);
+    TotalAmount = AmountPKR;
+    <div class="form-group">
+        <label>Description/Denomination</label>
+        <textarea class="form-control" @bind="@CitDenominationViewModel.Valuables"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Net Worth PKR</label>
+        <input type="number" class="form-control" @bind-value="AmountPKR" @bind-value:event="oninput">
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <textarea disabled class="form-control font-weight-bolder text-dark font-size-h7" @bind="@AmountInWordsPKR"></textarea>
+        </div>
+    </div>
+
+}
+
+@if (CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PKR || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PrizeBond)
+{
+    CitDenominationViewModel.ExchangeRate = 1;
+}
+else if (CitDenominationViewModel.CurrencySymbol == CurrencySymbol.USD || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.EURO)
+{
+    <div class="form-group">
+        <label>ExchangeRate</label>
+        <input type="number" step="any" class="form-control" @bind-value="CitDenominationViewModel.ExchangeRate" @bind-value:event="oninput">
+        <ValidationMessage For="() => CitDenominationViewModel.ExchangeRate"></ValidationMessage>
+    </div>
+
+}
+
+@if (CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PKR || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PrizeBond || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.USD || CitDenominationViewModel.CurrencySymbol == CurrencySymbol.EURO)
+{
+    TotalAmount = CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PrizeBond ?
+    CurrencyHelper.CalculatePrizeBondAmount(CitDenominationViewModel, CitDenominationViewModel.Type).GetValueOrDefault()
+    : CurrencyHelper.CalculateAmount(CitDenominationViewModel, CitDenominationViewModel.Type).GetValueOrDefault();
+    AmountPKR = Convert.ToInt32(TotalAmount.GetValueOrDefault() * CitDenominationViewModel.ExchangeRate);
+    AmountInWords = CurrencyHelper.AmountInWords(AmountPKR);
+    <div class="form-group">
+        <div class="input-group">
+            <label class="form-control font-size-h3 font-weight-bold">@(CitDenominationViewModel.CurrencySymbol == CurrencySymbol.PrizeBond ? "Amount" : "AmountPKR")</label>
+            <label class="form-control font-size-h3 font-weight-bold">@AmountPKR.ToString("N0")</label>
+            <ValidationMessage For="() => AmountPKR"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <textarea disabled class="form-control font-weight-bolder text-dark font-size-h7" @bind="@AmountInWords"></textarea>
+        </div>
+    </div>
+
+}
+
+
+@if (CitDenominationViewModel.FinalizeShipment)
+{
+    <div class="form-group">
+        <label>No. Of Bags</label>
+        <div class="input-group">
+            <input type="number" class="form-control" @bind-value="sealCodes.NoOfBags" @bind-value:event="oninput">
+        </div>
+    </div>
+
+    <div class="form-group mb-2">
+        <label>Seal Codes</label>
+    </div>
+    <div class="row">
+
+        <div class="form-group col-4">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="sealCodesFrom" placeholder="From" @bind-value:event="oninput">
+            </div>
+        </div>
+
+        <div class="form-group col-4">
+            <div class="input-group">
+                <input type="number" class="form-control" @bind-value="sealCodesTo" placeholder="To" @bind-value:event="oninput">
+            </div>
+        </div>
+
+        <div class="form-group col-4">
+            <div class="input-group">
+                <button type="button" class="form-control btn btn-danger" @onclick="createSealCodes">
+                    Create
+                </button>
+            </div>
+        </div>
+
+        @if (sealCodesError)
+        {
+            <div class="ml-4 validation-message">Sealcodes range must be between 1 to 30</div>
+        }
+    </div>
+
+    <div class="form-group">
+        @if (sealCodes != null)
+        {
+            <label>Seal Codes List</label>
+            foreach (var item in sealCodes.SealCodes)
+            {
+                <div class="input-group mb-2">
+                    <input type="number" class="form-control" @bind-value="item.SealCode" @bind-value:event="oninput">
+                    <div class="input-group-append">
+                        <a @onclick="()=>removeSeal(item)" class="btn font-weight-bold btn-danger btn-icon">
+                            <i class="la la-close"></i>
+                        </a>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(item.Error))
+                {
+                    <div class="validation-message">@item.Error</div>
+                }
+            }
+        }
+
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <button type="button" class="form-control btn btn-primary" @onclick="() => addSeal()">
+                <i class="fas fa-plus text-white mr-1"></i> Add Seal Code
+            </button>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="input-group">
+            <span class="font-weight-bolder text-danger font-size-h7">Please Review all of denominations and seal codes, You cannot change Amount/Denominations and seal codes once you hit save.</span>
+        </div>
+    </div>
+}
+@code {
+    [Inject]
+    protected IServiceScopeFactory? scopeFactory { get; set; }
+
+    [Parameter]
+    public CitDenominationViewModel CitDenominationViewModel { get; set; }
+
+    [Parameter]
+    public List<SelectListItem> DedicatedVehicles { get; set; }
+
+    public int? TotalAmount { get; set; }
+    public string AmountInWords { get; set; }
+    private int _amountPKR;
+
+    private int sealCodesFrom;
+    private int sealCodesTo;
+    private bool sealCodesError;
+    public int AmountPKR
+    {
+        get { return _amountPKR; }
+        set
+        {
+            if (_amountPKR != value)
+                NewAmountPKR.InvokeAsync(new Tuple<int, int>(value, TotalAmount.GetValueOrDefault()));
+            _amountPKR = value;
+
+        }
+    }
+
+    [Parameter]
+    public EventCallback<Tuple<int, int>> NewAmountPKR { get; set; }
+
+    [Parameter]
+    public SealCodeFormViewModel sealCodes { get; set; }
+
+    private void addSeal()
+    {
+        sealCodes.SealCodes.Add(new Seal() { CreatedAt = DateTime.Now });
+    }
+    private void removeSeal(Seal seal)
+    {
+        sealCodes.SealCodes.Remove(seal);
+    }
+
+    private void createSealCodes()
+    {
+        if (sealCodesTo < sealCodesFrom || (sealCodesTo - sealCodesFrom > 29) || (sealCodesFrom == 0 && sealCodesTo == 0))
+            sealCodesError = true;
+
+        else
+        {
+            sealCodesError = false;
+            for (int i = sealCodesFrom; i <= sealCodesTo; i++)
+            {
+                if (!sealCodes.SealCodes.Where(x => x.SealCode == i.ToString()).Any())
+                    sealCodes.SealCodes.Add(new Seal() { SealCode = i.ToString(), CreatedAt = DateTime.Now });
+            }
+        }
+    }
+    public bool IsChanged { get; set; }
+}

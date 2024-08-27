@@ -1,0 +1,105 @@
+﻿@page "/admin/complaints"
+@using SOS.OrderTracking.Web.Shared.ViewModels.Complaint
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@using SOS.OrderTracking.Web.Client.Components
+@inherits APICrudBaseV2<ComplaintFormViewModel, ComplaintListViewModel, int, ComplaintAdditionalValueViewModel, ComplaintService>
+@attribute [Authorize]
+
+<SubHeader Heading="Complaints" RowsCount="@TotalRows" HideSearch="true">
+
+</SubHeader>
+
+<FluentCard IsBusy="@IsTableBusy">
+    <EditForm Model="this">
+        <div class="row">
+            <div class="form-group col-3">
+                <label>Rating Stars</label><br />
+                <select class="form-control" @bind="RatingValue">
+                    <option value="0">Select an Option</option>
+                    <option value="1">1 Star</option>
+                    <option value="2">2 Star</option>
+                    <option value="3">3 Star</option>
+                    <option value="4">4 Star</option>
+                    <option value="5">5 Star</option>
+                </select>
+            </div>
+            <div class="form-group col-3">
+                <label>Category</label><br />
+                <select class="form-control" @bind="Category">
+                    <option value="">Select an Option</option>
+                    <option value="Bad Behaviour">Bad Behaviour</option>
+                    <option value="Bad Quality">Bad Quality</option>
+                    <option value="Shipment Delayed">Shipment Delayed</option>
+                </select>
+            </div>
+        </div>
+    </EditForm>
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+
+    @if (Items != null)
+    {
+<div class="row">
+    @foreach (var item in Items)
+    {
+
+        <div class="col-lg-4">
+            <!--begin::Card-->
+            <div class="card card-custom card-stretch">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h3 class="card-label">
+                            @item.ConsignmentCode <br />
+                            <small class="text-black">@item.CreatedBy</small>
+                            @if (item.ComplaintStatus == ComplaintStatus.Closed)
+                            {
+
+                                <small class="ml-4">
+                                    <span class="label label-dark label-inline mr-2"> @item.ComplaintStatus</span>
+                                </small>
+                            }
+                            else if (item.ComplaintStatus == ComplaintStatus.Created)
+                            {
+                                <small class="ml-4">
+                                    <span class="label label-danger label-pill label-inline mr-2">@item.ComplaintStatus</span>
+                                </small>
+                            }
+                            else if (item.ComplaintStatus == ComplaintStatus.InProcess)
+                            {
+                                <small class="ml-4">
+                                    <span class="label label-info label-inline mr-2"> @item.ComplaintStatus</span>
+                                </small>
+                            }
+                            @*<small>@item.ComplaintStatus</small>*@
+                        </h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <label class="font-weight-bolder text-dark">Categories:</label>
+                    <ul>
+                        @foreach (var cat in item.Categories)
+                        {
+                            <div class="d-flex align-items-center mt-2">
+                                <!--begin::Bullet-->
+                                <span class="bullet bullet-bar bg-success align-self-stretch"></span>
+                                <!--end::Bullet-->
+                                <!--begin::Text-->
+                                <div class="d-flex flex-column flex-grow-1 ml-5">
+                                    <a href="#" class="text-dark-75 text-hover-primary font-weight-bold font-size-lg mb-1">@cat</a>
+                                </div>
+                                <!--end::Text-->
+                            </div>
+                        }
+                    </ul>
+                    <label class="font-weight-bolder text-dark">Description:</label> @item.Description
+                </div>
+            </div>
+            <!--end::Card-->
+        </div>
+
+    }
+</div>
+    }
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>

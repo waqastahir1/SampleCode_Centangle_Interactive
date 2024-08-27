@@ -1,0 +1,109 @@
+﻿@page "/admin/notifications"
+@using SOS.OrderTracking.Web.Shared.ViewModels.Notification
+@using SOS.OrderTracking.Web.Client.Components
+@inject HttpClient Http
+@using Radzen.Blazor
+@inherits APICrudBase<NotificationsFormViewModel, NotificationsListViewModel, int>
+
+<div class="subheader py-2 py-lg-4  subheader-solid" id="kt_subheader">
+    <div class=" container-fluid  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                Crew Checkin
+            </h5>
+            <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-5 bg-gray-200"></div>
+            <div class="d-flex align-items-center" id="kt_subheader_search">
+                <span class="text-dark-50 font-weight-bold" id="kt_subheader_total">
+                    @TotalRows Total
+                </span>
+
+
+            </div>
+        </div>
+        <div class="d-flex align-items-center">
+
+        </div>
+    </div>
+</div>
+
+
+<FluentCard IsBusy="@IsTableBusy">
+    <Notification Content="@Error" Type="@NotificationCssClass.Danger"></Notification>
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Reciever</th>
+                <th>Crew Name</th>
+                <th>CreatedAt</th>
+                <th>SentAt</th>
+                <th>ReceivedAt</th>
+                <th>Status</th> 
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items != null)
+            {
+                @foreach (var item in Items)
+                {
+            <tr>
+                <td>@item.Title</td>
+                <td>@item.ReceiverUserName</td>
+                <td width="200">
+                    @item.OrganizationName
+                </td>  
+                <td>@item.CreatedAt</td>
+                <td>@item.SentAt</td>
+                <td>@item.ReceivedAt</td>
+                <td>
+                    @if (item.NotificationStatus == NotificationStatus.Error
+                       || item.NotificationStatus == NotificationStatus.FirbaseError)
+                    {
+
+                        <span class="btn btn-outline-danger btn-xs btn-pill mr-3">
+                            <i class="fa fa-exclamation-triangle"></i> Error
+                        </span>
+                    }
+                    else if (item.NotificationStatus == NotificationStatus.UndefinedUser)
+                    {
+
+                        <span class="btn btn-outline-danger btn-xs btn-pill mr-3">
+                            <i class="fa fa-exclamation-triangle"></i> No User Token
+                        </span>
+                    }
+                    else if (item.NotificationStatus == NotificationStatus.Sent)
+                    {
+
+                        <span class="btn btn-outline-warning btn-xs btn-pill mr-3">
+                            <i class="fa fa-check"></i> Sent
+                        </span>
+                    }
+                    else if (item.NotificationStatus == NotificationStatus.Delivered)
+                    {
+
+                        <span class="btn btn-outline-success btn-xs btn-pill mr-3">
+                            <i class="fa fa-check"></i> Delivered
+                        </span>
+                    }
+                </td>
+            </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+    <EditForm Model="CurrentIndex">
+        <PaginationStrip @bind-Value="CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>
+
+
+<InputForm Id="form1"
+           SelectedItem="SelectedItem"
+           IsBusy="IsModalBusy"
+           Heading="Notification Detail Form"
+           OnCancel="()=> SelectedItem = null"
+           OnValidSubmit="OnFormSubmit">
+    @*@if (SelectedItem.Id == 0)
+        {*@
+</InputForm>

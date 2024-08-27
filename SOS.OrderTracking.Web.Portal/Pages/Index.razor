@@ -1,0 +1,26 @@
+﻿@page "/"
+@inject NavigationManager navigationManager
+
+@* <AuthorizeView Roles="BankBranch,BankHybrid,BankBranchManager,BankCPC,BankCPCManager">
+    <SOS.OrderTracking.Web.Portal.Pages.CIT.Dashboards.CustomerDashboard />
+</AuthorizeView>
+<AuthorizeView Roles="BANK">
+    <SOS.OrderTracking.Web.Portal.Pages.CIT.Dashboards.BankHeadOfficeDashboard></SOS.OrderTracking.Web.Portal.Pages.CIT.Dashboards.BankHeadOfficeDashboard>
+</AuthorizeView> *@
+<AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+    @{
+        navigationManager.NavigateTo("/shipments/live", true);
+    }
+</AuthorizeView>
+@* <AuthorizeView Roles="VAULT">
+    @{
+        navigationManager.NavigateTo("/Vaults/Report", true);
+    }
+</AuthorizeView>
+
+<AuthorizeView Roles="CIT">
+    @{
+        navigationManager.NavigateTo("/Crew/Shipments", true);
+    }
+</AuthorizeView> *@
+

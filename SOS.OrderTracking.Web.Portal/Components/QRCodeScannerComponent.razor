@@ -1,0 +1,85 @@
+﻿@if (ShowOutput)
+{
+    <div class="d-flex justify-content-center mb-5">
+        <input id="QRBoxField" autofocus class="form-control text-center" style="max-width:15rem" @bind-value="@Value" />
+    </div>
+}
+@if (ScannedCodes != null)
+{
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3>Seals</h3>
+        </div>
+        @foreach (var item in ScannedCodes)
+        {
+            <div class="col-md-3 col-lg-2">
+                <h4 class="d-flex align-items-center" style="width:12rem">
+                    @item
+                    @if (ShowOutput)
+                    {
+                        <span class="btn px-2 btn-lg text-danger" @onclick="()=>ScannedCodes.Remove(item)">X</span>
+                    }
+                </h4>
+            </div>
+
+        }
+    </div>
+}
+
+@if (!IsSecondFormOpen)
+{
+    <div class="footer">
+        <div class="text-right">
+            <button type="button" @onclick="async ()=>await Submit.InvokeAsync(ScannedCodes)" class="btn btn-success mr-2">Submit</button>
+        </div>
+    </div>
+}
+@code {
+
+    [Parameter]
+    public string? Width { get; set; }
+
+    [Parameter]
+    public bool ShowOutput { get; set; } = false;
+
+    [Parameter]
+    public bool IsSecondFormOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<List<string>> Submit { get; set; }
+
+
+    public List<string> ScannedCodes
+    {
+        get
+        {
+            return _scannedCodes;
+        }
+        set
+        {
+            _scannedCodes = value;
+        }
+    }
+
+    private List<string> _scannedCodes;
+
+    public string Value
+    {
+        get { return _value; }
+        set
+        {
+            if (value.Length > 0)
+            {
+                if (ScannedCodes == null)
+                    ScannedCodes = new List<string>();
+
+                if (!ScannedCodes.Contains(value))
+                    ScannedCodes.Add(value);
+
+                _value = "";
+            }
+        }
+    }
+
+    private string _value;
+}

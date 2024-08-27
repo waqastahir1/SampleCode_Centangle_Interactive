@@ -1,0 +1,94 @@
+﻿@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared.ViewModels.Vault
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@inherits APICrudBaseV2<VaultConsignmentViewModel, VaultConsignmentListViewModel, int, VaultConsignmentAdditionalValueModel, VaultConsignmentService>
+
+@attribute [Authorize]
+
+
+<SubHeader Heading="Vault Consignments" RowsCount="@TotalRows" HideSearch="true">
+    <ChildContent>
+        <a @onclick="()=> PubSub.Hub.Default.Publish<VaultConsignment>(null)" class="btn btn-secondary font-weight-bold ml-2">
+            <span><i class="fa fa-times"></i></span>
+        </a>
+    </ChildContent>
+</SubHeader>
+
+
+<FluentCard IsBusy="@IsTableBusy">
+    <div class="row">
+        <div class="col-6 text-black bold">
+            <h6>Vault Name: @vaultName </h6>
+        </div>
+    </div>
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+    @if (Items != null)
+    {
+        <table class="items-table">
+            <thead>
+                <tr>
+
+                    <th> ShipmentCode </th>
+                    <th> CreatedAt </th>
+                    <th> Collection Branch </th>
+                    <th> Delivery Branch </th>
+                    <th> Status </th>
+                    <th> Amount </th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Items)
+                {
+                <tr>
+                    <td>
+                        @item.ShipmentCode
+                    </td>
+                    <td>@item.CreatedAt.GetValueOrDefault().ToString("dd-MM-yyyy")</td>
+
+                    <td>
+                        @item.FromPartyCode
+                    </td>
+                    <td>
+                        @item.ToPartyCode
+                    </td>
+                    <td>
+                        @if (item.ConsignmentStateType < ConsignmentState.InTransit)
+                        {
+                            <span>Incoming</span>
+                        }
+                        else if (item.ConsignmentStateType == ConsignmentState.InTransit)
+                        {
+                            <span>Vault</span>
+                        }
+                        else
+                        {
+                            <span>Out</span>
+                        }
+                    </td>
+                    <td>
+                        @item.Amount.ToString("N0")
+                    </td>
+
+                </tr>
+                }
+                <tr>
+                    <td colspan="5" style="text-align:right">
+                        <strong style="text-align:right">Total Value of Vault Shipments &nbsp;</strong>
+                    </td>
+
+                    <td>
+                        <h5 class="font-weight-bold mt-3">
+                            @(Items.Where(x => x.ConsignmentStateType == ConsignmentState.InTransit)
+                            .Sum(x => x.Amount)
+                            .ToString("N0"))
+                        </h5>
+                    </td>               
+                </tr>
+            </tbody>
+        </table>
+    }
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>

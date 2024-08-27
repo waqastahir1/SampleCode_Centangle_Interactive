@@ -1,0 +1,86 @@
+﻿@inherits InputSelect<int>
+<style>
+    a {
+        cursor: pointer;
+    }
+</style>
+@{
+    int n = 7;
+    List<int> all = new List<int>(TotalPages);
+    for (int i = 1; i <= TotalPages; i++)
+    {
+        if (i != Value)
+            all.Add(i);
+    }
+
+    List<int> pages = new List<int>(n);
+    pages.Add(Value);
+    for (int i = 1; i <= n / 2; i++)
+    {
+        var u = all.FirstOrDefault(x => x > Value);
+        if (u > 0)
+        {
+            pages.Add(u);
+            all.Remove(u);
+        }
+        else
+        {
+            var l = all.LastOrDefault(x => x < Value);
+            if (l > 0)
+            {
+                pages.Add(l);
+                all.Remove(l);
+            }
+        }
+
+
+        var u1 = all.LastOrDefault(x => x < Value);
+        if (u1 > 0)
+        {
+            pages.Add(u1);
+            all.Remove(u1);
+        }
+        else
+        {
+            var l1 = all.FirstOrDefault(x => x > Value);
+            if (l1 > 0)
+            {
+                pages.Add(l1);
+                all.Remove(l1);
+            }
+        }
+        pages.Sort();
+    }
+}
+@if (TotalPages > 1)
+{
+<div class="d-flex justify-content-between align-items-center flex-wrap mt-8">
+    <div class="d-flex flex-wrap mr-3">
+        <a @onclick="() => UpdatePage(1)" class="btn btn-icon btn-sm btn-light-warning mr-2 my-1"><i class="far fa-chevron-double-left"></i></a>
+        <a @onclick="() => UpdatePage(Math.Max(Value - 1, 1))" class="btn btn-icon btn-sm btn-light-warning mr-2 my-1"><i class="far fa-chevron-left"></i></a>
+        <a @onclick="() => UpdatePage(Math.Max(Value - n - 1, 1))" href="#" class="btn btn-icon btn-sm border-0 btn-hover-warning mr-2 my-1">...</a>
+        @foreach (int i in pages)
+        {
+            int c = i;
+            var activeClass = Value == c ? "active" : null;
+
+            <a  @onclick="() => UpdatePage(c)" class="btn btn-icon btn-sm border-0 btn-hover-warning mr-2 my-1 @activeClass">@c</a>
+        } 
+        <a @onclick="() => UpdatePage(Math.Min(Value + n - 1, TotalPages))" class="btn btn-icon btn-sm border-0 btn-hover-warning mr-2 my-1">...</a>
+        <a @onclick="() => UpdatePage(Math.Min(Value + 1, TotalPages))" class="btn btn-icon btn-sm btn-light-warning mr-2 my-1"><i class="far fa-chevron-right"></i></a>
+        <a @onclick="() => UpdatePage(TotalPages)" class="btn btn-icon btn-sm btn-light-warning mr-2 my-1"><i class="far fa-chevron-double-right"></i></a>
+    </div>
+    <div class="d-flex align-items-center">
+        @*<InputSelectNumeric @bind-Value="CurrentValue.RowsPerPage" class="form-control form-control-sm text-warning font-weight-bold mr-4 border-0 bg-light-warning" style="width: 75px;">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="30">30</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="@TotalRows">All</option>
+        </InputSelectNumeric>*@
+        <span class="text-muted">Displaying RowsPerPage of @TotalRows records</span>
+    </div>
+</div>
+}
+ 

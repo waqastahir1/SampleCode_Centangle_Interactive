@@ -1,0 +1,224 @@
+﻿@page "/admin/crews"
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Shared.ViewModels.Crew
+
+@inherits APICrudBaseV2<CrewFormViewModel, CrewListViewModel, int, CrewAdditionalValueViewModel, CrewService>
+@attribute [Authorize(Roles = "SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin")]
+
+<SubHeader Heading="Manage Crews" RowsCount="@TotalRows" HideSearch="true">
+    <a @onclick="()=> OnItemClick(0,null,null,null)" class="btn btn-light-warning font-weight-bold ml-2">
+        Create new Crew
+    </a>
+</SubHeader>
+<style>
+    .bg-primary-o-20 {
+        background-color: rgba(250,250,250, 0.5) !important;
+    }
+
+    .items-table tbody tr:nth-child(even) {
+        background: whitesmoke;
+    }
+
+    .items-table tbody tr:nth-child(odd) {
+        background: #FFF
+    }
+
+    .items-table thead tr th {
+        border-bottom: solid 1px #a09f9f !important;
+    }
+</style>
+<div class="row">
+    @{
+        var leftColumnsCount = CrewId > 0 ? 5 : 12;
+    }
+
+    <div class="col-@leftColumnsCount" style="border-right: 1px #e56464 dotted;">
+        <EditForm Model="this">
+            <div class="text-dark form-group ml-5 col-4">
+                <label class="text-black col-form-label">Show All</label><br />
+                <span class="switch switch-outline switch-icon switch-success">
+                    <label>
+                        <input type="checkbox" @bind="showAll" name="select">
+                        <span></span>
+                    </label>
+                </span>
+            </div>
+        </EditForm>
+        <FluentCard IsBusy="@IsTableBusy">
+            <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Crew Code</th>
+                        @if (CrewId == 0)
+                        {
+                            <th>Region</th>
+                            <th>Sub Region</th>
+
+                        }
+                        <th>Station</th>
+                        <th>Vehicle</th>
+                        <th></th>
+                        @if (CrewId == 0)
+                        {
+                            <th>Formation Date</th>
+                            <th>Disposal Date</th>
+                            <th></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Items != null)
+                    {
+                        @foreach (var item in Items)
+                        {
+                            var color = item.Id == CrewId ? "#ccc" : "white";
+                            <tr style="cursor:pointer;">
+                                <td style="background-color:@color;" @onclick="() => { CrewId = item.Id; crewName = item.Name; }" class="pl-4">@item.Name</td>
+                                @if (CrewId == 0)
+                                {
+                                    <td style="background-color:@color;" @onclick="() => { CrewId = item.Id; crewName = item.Name; }">@item.RegionName</td>
+                                    <td style="background-color:@color;" @onclick="() => { CrewId = item.Id; crewName = item.Name; }">@item.SubRegionName</td>
+                                }
+                                <td style="background-color:@color;" @onclick="() => { CrewId = item.Id; crewName = item.Name; }">@item.StationName</td>
+                                <td style="background-color:@color;" @onclick="() => { CrewId = item.Id; crewName = item.Name; }">@item.Vehicle</td>
+                                <td style="background-color:@color;" @onclick="() => { CrewId = item.Id; crewName = item.Name; }">
+                                    @if (item.ActiveMembersCount > 0)
+                                    {
+                                        var colour = "";
+                                        @for (int i = 0; i < item.ActiveMembersCount; i++)
+                                        {
+                                            colour = i < item.PresentMembersCount ? "#42b542" : "#3493cf";
+
+                                            <span style="font-size: 0.8rem; color:@colour" class="fas fa-circle mr-1"></span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #d4951c; border: 1px #d4951c solid; padding: 2px 8px;border-radius: 20px;">Vacant</span>
+                                    }
+                                </td>
+                                @if (CrewId == 0)
+                                {
+                                    <td @onclick="() => { CrewId = item.Id; crewName = item.Name; }">@item.StartDate.ToString("dd-MM-yyyy")</td>
+                                    <td @onclick="() => { CrewId = item.Id; crewName = item.Name; }">@item.ThruDate?.ToString("dd-MM-yyyy")</td>
+                                    <td style="padding:2px; text-align:right">
+                                        <a class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;" @onclick="() => OnItemClick(item.Id,item.RegionId,item.SubRegionId,item.StationId)">
+                                            <i class="flaticon2-pen"></i>
+                                        </a>
+                                        <a class='btn btn-icon btn-light-@(item.HasAccount ? "success": "danger") btn-sm mr-2' @onclick="() => OnUserFormClicked(item.Id, item.HasAccount)">
+                                            <i class="fas fa-user-circle"></i>
+                                        </a>
+                                    </td>
+                                }
+
+
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+            <EditForm Model="BaseIndexModel.CurrentIndex">
+                <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+            </EditForm>
+        </FluentCard>
+    </div>
+    @if (CrewId > 0)
+    {
+        <div class="col-7">
+            <CrewMembers crewName="@crewName" Id="@CrewId"></CrewMembers>
+        </div>
+    }
+</div>
+
+
+<InputForm SelectedItem="@SelectedItem"
+           OnCancel="()=> { SelectedItem = null; ValidationError = null;}"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="OnFormSubmit"
+           Heading="Add Crew">
+    <div class="form-group">
+        <label>Crew Code/Name<b class="text-danger">*</b></label>
+        <input @bind="SelectedItem.Name" type="text" class="form-control" />
+        <ValidationMessage For="() => SelectedItem.Name"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Crew Region</label>
+        <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                        Data="@Regions" Placeholder="Select a Region" AllowFiltering="true"
+                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.RegionId" />
+        <ValidationMessage For="() => SelectedItem.RegionId"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Crew SubRegion</label>
+        <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                        Data="@SubRegions" Placeholder="Select a Sub-Region" AllowFiltering="true"
+                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.SubRegionId" />
+        <ValidationMessage For="() => SelectedItem.SubRegionId"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Crew Station</label>
+        <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                        Data="@Stations" Placeholder="Select a Station" AllowFiltering="true"
+                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.StationId" />
+        <ValidationMessage For="() => SelectedItem.StationId"></ValidationMessage>
+    </div>
+
+    <div class="form-group">
+        <label>Vehicle</label>
+        <RadzenDropDown AllowClear="true" TValue="int" class="form-control"
+                        Data="@Vehicles" Placeholder="Select a Vehicle" AllowFiltering="true"
+                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.VehicleId" />
+        <ValidationMessage For="() => SelectedItem.VehicleId"></ValidationMessage>
+    </div>
+
+    <div class="form-group">
+        <label>Start Date</label>
+        <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.StartDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+        <ValidationMessage For="() => SelectedItem.StartDate"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>End Date</label>
+        <RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.ThruDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+        <ValidationMessage For="() => SelectedItem.ThruDate"></ValidationMessage>
+    </div>
+</InputForm>
+<InputForm SelectedItem="@CrewUserViewModel"
+           OnCancel="()=> CrewUserViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="OnUserFormSubmit"
+           Heading="Create User">
+
+    <div class="form-group">
+        <label>User Name</label>
+        <input @bind="CrewUserViewModel.UserName" type="text" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => CrewUserViewModel.UserName"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Password</label>
+        <input @bind="CrewUserViewModel.Password" type="password" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => CrewUserViewModel.Password"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>IMEI Number</label>
+        <InputText @bind-Value="CrewUserViewModel.IMEINumber" type="text" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => CrewUserViewModel.IMEINumber"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <div class="form-group row">
+            <label class="col-4 col-form-label">User Enabled</label>
+            <div class="col-6">
+                <span class="switch switch-outline switch-icon switch-success">
+                    <label>
+                        <input type="checkbox" @bind="CrewUserViewModel.IsEnabled" name="select">
+                        <span></span>
+                    </label>
+                </span>
+            </div>
+        </div>
+    </div>
+</InputForm>

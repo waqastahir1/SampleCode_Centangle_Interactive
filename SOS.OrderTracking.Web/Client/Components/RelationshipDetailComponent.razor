@@ -1,0 +1,45 @@
+﻿@if (!Model.StartDate.HasValue)
+{
+    <div class="form-group">
+        <div class="input-group">
+            <textarea class="form-control" readonly="readonly" style="height: 45pt;">Selected Employee is not appointed anywhere do you want to appoint him here ?</textarea>
+        </div>
+    </div>
+}
+else
+{
+<div class="form-group">
+    <div class="input-group">
+        <textarea class="form-control" readonly="readonly" style="height: 75pt;">Selected Employee is already appointed as per details below. Press yes to make new Appointment.</textarea>
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="input-group">
+        <label class="form-control">Organization Name</label><br />
+        <label class="form-control">@Model.OrganizationName</label>
+    </div>
+</div>
+<div class="form-group">
+    <div class="input-group">
+        <label class="form-control">Organization Type</label><br />
+        <label class="form-control">@Model.OrganizationTypeAsString</label>
+    </div>
+</div>
+<div class="form-group">
+    <div class="input-group">
+        <label class="form-control">Start Date</label><br />
+        <label class="form-control">@Model.StartDate</label>
+    </div>
+</div>
+<div class="form-group">
+    <div class="input-group">
+        <label class="form-control">End Date</label><br />
+        <label class="form-control">@Model.EndDate</label>
+    </div>
+</div>
+}
+@code{
+    [Parameter]
+    public RelationshipDetailViewModel Model { get; set; }
+}

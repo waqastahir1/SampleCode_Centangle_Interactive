@@ -1,0 +1,97 @@
+﻿@using SOS.OrderTracking.Web.Shared.ViewModels.Crew
+<hr />
+<br />
+<div class="form-group">
+    @{
+        int i = 0;
+        //Crews = Crews?.OrderBy(crew => (DateTime.UtcNow - crew?.CrewLocation?.TimeStamp)?.TotalSeconds); 
+}
+     @if(Crews?.Count() > 0){
+    @foreach (var crew in ShowAllCrews ? Crews : Crews.Take(5))
+    {
+        i++;
+        var color = crew.IntValue == DeliveryCrewFormViewModel.CrewId ? "gainsboro" : "white";
+        <div class="d-flex flex-wrap align-items-center mb-10" style="padding-right:8px; background-color:@color;">
+            <!--begin::Symbol-->
+            <div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4 text-center">
+                <div class="symbol-label" style="background-image: url('https://image.flaticon.com/icons/svg/0/93.svg')" @onclick="() => DeliveryCrewFormViewModel.CrewId = crew.IntValue"></div>
+                @if (crew?.CrewLocation == null)
+                {
+                    <span class="text-danger font-weight-bold text-center">No Data</span>
+                } 
+                else
+                {
+                    var ts = (DateTime.UtcNow - crew?.CrewLocation?.TimeStamp);
+                    @if (ts?.TotalDays > 1)
+                    {
+                        <span class="text-danger font-weight-bold text-center">Out dated</span>
+                    }
+                    else if (ts?.TotalDays == 1)
+                    {
+                        <span class="text-warning font-weight-bold text-center">Yesterday</span>
+                    }
+                    else if (ts?.TotalHours >= 1)
+                    {
+                        <span class="text-warning font-weight-bold text-center">@(Math.Round(ts.GetValueOrDefault().TotalHours)) hours ago</span>
+                    }
+                    else if (ts?.TotalMinutes >= 1)
+                    {
+                        <span class="text-info font-weight-bold text-center">@(Math.Round(ts.GetValueOrDefault().TotalMinutes)) minutes ago</span>
+                    }
+                    else if (ts?.TotalMinutes < 1)
+                    {
+                        <span class="text-success font-weight-bold text-center">Up to date</span>
+                    }
+                }
+
+            </div>
+            <!--end::Symbol-->
+            <!--begin::Title-->
+            <div class="d-flex flex-column flex-grow-1 my-lg-0 my-2 pr-3">
+                <span class="text-dark-75 font-weight-bolder font-size-lg">@crew?.Text</span> 
+                <a class="text-dark-50 font-weight-bold font-size-sm my-1" style="cursor:pointer; color:#1956d3 !important" target="_blank"
+                 href="https://www.google.com/maps/dir/@crew?.CrewLocation?.Lat,@crew?.CrewLocation?.Lng/@crew?.PickupLocation?.Lat,@crew?.PickupLocation?.Lng">
+                    <span class="text-primary font-weight-bold">@crew?.PickeupStats</span>
+                </a>
+                <span class="text-dark-50 font-weight-bold font-size-sm">
+                    <span class="text-primary font-weight-bold">@crew?.ConsignmentDistance</span>
+                </span>
+                <span class="text-dark-50 font-weight-bold font-size-sm">
+                    <span class="text-primary font-weight-bold">@crew?.ClosetToDropffDistance</span>
+                </span>
+                <span class="text-dark-50 font-weight-bold font-size-sm" style="cursor:pointer; color:#1956d3 !important">
+                    <span class="text-info font-weight-bold" @onclick="() => ShowConsigments.InvokeAsync(crew.IntValue)">@crew?.PickupUpConsignments</span>
+                </span>
+            </div>
+
+            @if (crew.IntValue == DeliveryCrewFormViewModel.CrewId)
+            {
+                <div class="d-flex align-items-center py-lg-0 py-2">
+                    <div class="d-flex flex-column text-right">
+                        <span class=""><i class="far fa-check-circle text-danger"></i></span>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (i == 5)
+        {
+            <hr />
+        }
+
+    }
+    }
+
+    <a class="float-right" style="color: #1555ea;" @onclick="()=> { ShowAllCrews = !ShowAllCrews; }">@(ShowAllCrews?"Show top 5...": "Show all...")</a>
+
+</div>
+
+@code {
+    [Parameter]
+    public bool ShowAllCrews { get; set; }
+    [Parameter]
+    public DeliveryCrewFormViewModel DeliveryCrewFormViewModel { get; set; }
+    [Parameter]
+    public IEnumerable<CrewWithLocation> Crews { get; set; }
+    [Parameter]
+    public EventCallback<int?> ShowConsigments { get; set; }
+}

@@ -1,0 +1,18 @@
+﻿@inherits ComponentBase
+@if (IsBusy)
+{
+    <div class="overlay overlay-block rounded">
+        <div class="overlay-wrapper">
+           
+        </div>
+        <div class="overlay-layer rounded bg-primary-o-20">
+            <div class="spinner spinner-primary"></div>
+        </div>
+    </div>
+}
+
+@code{ 
+    [Parameter]
+    public bool IsBusy { get; set; }
+}
+

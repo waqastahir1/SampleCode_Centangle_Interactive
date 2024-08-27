@@ -1,0 +1,179 @@
+﻿@using SOS.OrderTracking.Web.Portal.Components
+@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using Radzen.Blazor
+<div class="">
+    <div class="table table-light table-light-success">
+        <div>
+            <div class="bg-white row">
+                <p class="pl-5">Schdeule set between 1 hour from now will be schduled on next week</p>
+                <div class="col-3 p-5 pl-8"  >Monday</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.MondayScheduleExist" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.MondayScheduleExist)
+                    {
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.MondayTime" />
+                    }
+                    else
+                    {
+                        ScheduleViewModel.MondayTime = null;
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.MondayTime" readonly disabled />
+                    }
+                </div>
+            </div>
+            <div class="bg-gray-100 row">
+                <div class="col-3 p-5 pl-8"  >Tuesday</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.TuesdayScheduleExist" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.TuesdayScheduleExist)
+                     {
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.TuesdayTime" />
+                    }
+                    else
+                    {
+                        ScheduleViewModel.TuesdayTime = null;
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.TuesdayTime" readonly disabled />
+                    }
+                </div>
+            </div>
+            <div class="bg-white row">
+                <div class="col-3 p-5 pl-8"  >Wednesday</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.WednesdayScheduleExist" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.WednesdayScheduleExist)
+                    {
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.WednesdayTime" />
+                    }
+                    else
+                    {
+                        ScheduleViewModel.WednesdayTime = null;
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.WednesdayTime" readonly disabled />
+                    }
+                </div>
+            </div>
+            <div class="bg-gray-100 row">
+                <div class="col-3 p-5 pl-8"  >Thursday</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8">
+                            <input type="checkbox" @bind="ScheduleViewModel.ThursdayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.ThursdayScheduleExist)
+                     {
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.ThursdayTime" />
+                    }
+                    else
+                    {
+                        ScheduleViewModel.ThursdayTime = null;
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.ThursdayTime" readonly disabled />
+                    }
+                </div>
+            </div>
+            <div class="bg-white row">
+                <div class="col-3 p-5 pl-8"  >Friday</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8 ">
+                            <input type="checkbox" @bind="ScheduleViewModel.FridayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.FridayScheduleExist)
+                   {
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.FridayTime" />
+                    }
+                    else
+                    {
+                        ScheduleViewModel.FridayTime = null;
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.FridayTime" readonly disabled />
+                    }
+                </div>
+            </div>
+            <div class="bg-gray-100 row">
+                <div class="col-3 p-5 pl-8"  >Saturday</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8 ">
+                            <input type="checkbox" @bind="ScheduleViewModel.SaturdayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.SaturdayScheduleExist)
+                    {
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.SaturdayTime" />
+                    }
+                    else
+                    {
+                        ScheduleViewModel.SaturdayTime = null;
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.SaturdayTime" readonly disabled />
+                    }
+                </div>
+            </div>
+            <div class="bg-white row">
+                <div class="col-3 p-5 pl-8"  >Sunday</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8 ">
+                            <input type="checkbox" @bind="ScheduleViewModel.SundayScheduleExist" class="h-20px w-20px" />
+                            <span class="h-20px w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="font-weight-bold col-5" style="padding-left: 0px;">
+                    @if (ScheduleViewModel.SundayScheduleExist)
+                 {
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.SundayTime" />
+                    }
+                    else
+                    {
+                        ScheduleViewModel.SundayTime = null;
+                        <input type='time' class='form-control m-2'@bind-value="ScheduleViewModel.SundayTime" readonly disabled />
+                    }
+                </div>
+            </div>
+            <div class="bg-gray-100 row">
+                <div class="col-3 p-5 pl-8"  >Recuring Schedule</div>
+                <div class="col-3 p-4">
+                    <div class="checkbox-inline">
+                        <label class="checkbox checkbox-lg checkbox-outline checkbox-success text-center ml-10  mb-8 ">
+                            <input type="checkbox" @bind="ScheduleViewModel.IsRecuringSchedule" class="h-20px w-20px" />
+                            <span class="h-20px mt-1 w-20px"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ScheduleViewModel ScheduleViewModel { get; set; }
+}

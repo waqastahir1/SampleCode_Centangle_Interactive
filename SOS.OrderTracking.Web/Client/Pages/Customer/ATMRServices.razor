@@ -1,0 +1,328 @@
+﻿@page "/customer/atmrorders"
+@using SOS.OrderTracking.Web.Shared.ViewModels
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared
+
+@inherits APICrudBase<ATMServiceFormViewModel, ATMServiceListViewModel, int>
+
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+
+    .card {
+        box-shadow: 0 3.2px 7.2px 0 rgba(0,0,0,.132), 0 0.6px 1.8px 0 rgba(0,0,0,.108) !important;
+        box-shadow: 0 3.2px 7.2px 0 var(--callout-shadow-color,rgba(0, 0, 0, .132)),0 .6px 1.8px 0 var(--callout-shadow-secondary-color,rgba(0, 0, 0, .108)) !important;
+        height: 34em;
+    }
+
+    .header-fixed.subheader-fixed .header {
+        background-color: white !important;
+    }
+
+    .header-fixed.subheader-fixed .subheader {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .label.label-info {
+        color: #ffffff;
+        background-color: #24a4df;
+    }
+
+    .ps-left-box {
+        background: #c0e5f6;
+        border-radius: 5px;
+        margin-top: 2px !important;
+    }
+
+        .ps-left-box .form-control-solid {
+            background-color: #ffffff !important;
+        }
+
+    .urdu-font {
+        font-family: 'Noto Nastaliq Urdu Draft', serif;
+        font-size: 12px !important
+    }
+
+    .list-item-active {
+        background-color: #fdfeff;
+    }
+
+    .dropdown-toggle::after {
+        content: none !important;
+    }
+
+    .dropdown-toggle::before {
+        content: none !important;
+    }
+
+    .dropdown-toggle {
+        text-decoration: none !important;
+        cursor: pointer;
+        margin: 0 4px !important;
+    }
+
+    .invoice-list .card .card-header {
+        padding: 0.5rem 1rem !important;
+        height: auto !important;
+    }
+
+    .active > span > i {
+        color: white !important;
+    }
+
+    table th, .table td {
+        padding: 0.3rem;
+    }
+
+    .address {
+        border: 1px dashed #eee;
+        background: #fafafa;
+        cursor: pointer;
+    }
+</style>
+
+<SubHeader Heading="Create ATMR" RowsCount="@TotalRows">
+    <a @onclick="()=> LoadItems()" class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="fa fa-sync-alt"></i>
+    </a>
+    <a @onclick="()=> OnItemClicked(0)" class="btn btn-danger font-weight-bold ml-2">
+        Create ATMR
+    </a>
+</SubHeader>
+
+<FluentContent IsBusy="IsTableBusy">
+    <div class="row">
+        @if (Items != null)
+        {
+            @foreach (var item in Items)
+            {
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6">
+                    <div class="card card-custom gutter-b">
+                        <div class="card-header ribbon ribbon-right">
+                            <div class="ribbon-target " style="top: 10px; right: -2px;">
+                                <a id="editPen" style="cursor:pointer;" @onclick="() => EditViewModel(item.Id)">
+                                    <i class="flaticon2-pen text-white mr-5"></i>
+                                </a>
+                                <ul class="nav ">
+                                    <li class="nav-item dropdown">
+                                        <div style="padding:4px;" class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#"
+                                             role="button" aria-haspopup="true" aria-expanded="false">
+                                            &nbsp; <i class="fa fa-ellipsis-v text-white"></i> &nbsp;
+                                        </div>
+                                        <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" style="padding:8px 0;">
+                                            <a href="#basic_info_@item.Id" data-toggle="tab" class="dropdown-item" id="___@item.Id"
+                                               @onclick="() => { }">
+                                                <span><i class="flaticon2-list-3 mr-2"></i>Consignment</span>
+                                            </a>
+                                            <a href="#qrcode_@item.Id" data-toggle="tab" class="dropdown-item" id="___@item.Id">
+                                                <span><i class="far fa-qrcode mr-2"></i>Show QR-Code</span>
+                                            </a>
+                                            <a class="dropdown-item">
+                                                <span class="navi-text">
+                                                    <i class="far fa-times-circle mr-2"></i>Cancel Order
+                                                </span>
+                                            </a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <h3 class="card-title">
+                                @item.ConsignmentNo<br />
+                                <span class="text-muted mt-1 float-left w-100 font-weight-bold font-size-sm">Time: Today 09:07am</span>
+                            </h3>
+                            <div class="card-toolbar">
+
+                            </div>
+                        </div>
+                        <!--begin::Body-->
+                        <div class="card-body pt-4">
+                            <div class="tab-content" id="card_tabs_@item.Id">
+                                <div class="tab-pane fade active show" id="basic_info_@item.Id"
+                                     role="tabpanel" aria-labelledby="basic_info_@item.Id">
+                                    <div class="d-flex align-items-center">
+                                        @{ var logo = item.CustomerCode + ".png";}
+                                        <div class="symbol symbol-60 symbol-xl-80 mr-5 align-self-start align-self-xl-center">
+                                            <img src="/assets/media/logos/@logo" onerror="this.onerror=null; this.src='/assets/media/logos/Default.png'" />
+                                        </div>
+                                        <div>
+                                            <a href="#" class="font-weight-bold font-size-h6 text-dark-75 text-hover-primary">
+                                                @item.CustomerName
+                                            </a>
+                                            <div class="mt-0">
+                                                <span class="label label-inline label-warning font-weight-bolder">@EnumHelper.GetDisplayValue(item.ATMRServiceType)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap mt-4">
+                                        <!--begin::Item-->
+                                        <div class="d-flex align-items-center flex-lg-fill mr-5 mb-2">
+                                            <span class="mr-4">
+                                                <i class="fal fa-stopwatch display-5 text-muted"></i>
+                                            </span>
+                                            <div class="d-flex flex-column text-dark-50">
+                                                <span class="font-weight-bolder font-size-xs">Deadline</span>
+                                                <span class="font-weight-bolder text-dark font-size-h7">
+                                                    @{
+                                                        var dealineString = item.Deadline.HasValue ?
+                                                             item.Deadline.Value.ToString("dd-MM-yyyy hh:mm") : "Not specified";
+                                                    }
+                                                    @dealineString
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!--end::Item-->
+                                        <!--begin::Item-->
+                                        <div class="d-flex align-items-center flex-lg-fill mr-5 mb-2">
+                                            <span class="mr-4">
+                                                <i class="fal fa-tools display-5 text-muted "></i>
+                                            </span>
+                                            <div class="d-flex flex-column flex-lg-fill">
+                                                <span class="text-dark-50 font-weight-bolder font-size-xs">Type</span>
+                                                <span class="font-weight-bolder text-dark font-size-h7">@EnumHelper.GetDisplayValue(item.ATMRServiceType)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="pb-4 mt-3">
+                                        <ul class="nav nav-tabs nav-tabs-line">
+                                            <li class="nav-item">
+                                                <a class="nav-link active" data-toggle="tab" href="#pkup_@item.Id">ATM Details</a>
+                                            </li>
+                                            @if (item.ATMRServiceType == ATMRServiceType.ATMR)
+                                            {
+                                                <li class="nav-item">
+                                                    <a class="nav-link" data-toggle="tab" href="#drop_@item.Id">Cash Source</a>
+                                                </li>
+                                            }
+                                        </ul>
+                                        <div class="tab-content mt-5" id="myTabContent">
+                                            <div class="tab-pane fade show active" id="pkup_@item.Id" role="tabpanel" aria-labelledby="kt_tab_pane_2">
+                                                <div class="pb-1">
+                                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                                        <h6 class="text-muted text-hover-primary"> @item.AtmCode - @item.AtmName</h6>
+                                                    </div>
+                                                    <div class="d-flex align-items-center justify-content-between">
+                                                        <span class="text-black font-size-sm">
+                                                            <i class="flaticon2-pin mr-2 text-warning"></i>
+                                                            @{ item.AtmAddress = item.AtmAddress ?? "Not Specified";}
+                                                            @item.AtmAddress
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @if (item.ATMRServiceType == ATMRServiceType.ATMR)
+                                            {
+                                                <div class="tab-pane fade" id="drop_@item.Id" role="tabpanel" aria-labelledby="kt_tab_pane_2">
+                                                    <div class="pb-1">
+                                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                                            <h6 class="text-muted text-hover-primary"> @item.CashBranchCode - @item.CashBranchName</h6>
+                                                        </div>
+                                                        <div class="d-flex align-items-center justify-content-between">
+                                                            <span class="text-black font-size-sm">
+                                                                <i class="flaticon2-pin mr-2 text-warning"></i> @item.CashBranchAddress
+                                                            </span>
+                                                        </div>
+                                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                                            <span class="text-black  font-size-sm"> <i class="flaticon2-phone mr-2 text-warning"></i> @item.CashBranchContact</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </div> 
+                                <QRCode ItemId="@item.Id" Code="@item.QrCode"></QRCode>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+    <div class="mb-8 ml-4 mr-4">
+        <EditForm Model="CurrentIndex">
+            <PaginationStrip @bind-Value="CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+        </EditForm>
+    </div>
+</FluentContent>
+
+<InputForm SelectedItem="SelectedItem"
+           IsBusy="IsModalBusy"
+           Heading="ATM-R Request Form"
+           OnCancel="()=> SelectedItem = null"
+           Error="@ValidationError"
+           OnValidSubmit="OnFormSubmit">
+    <ValidationSummary></ValidationSummary>
+    <div class="form-group">
+        <label>Request Type</label>
+        <InputSelect class="form-control" @bind-Value="SelectedItem.ATMRServiceType" placeholder="Select a value">
+            <option value="" disabled selected>Select an option</option>
+            <option value="@ATMRServiceType.ATMR">Replenishment</option>
+            <option value="@ATMRServiceType.FLM">FLM</option>
+            <option value="@ATMRServiceType.SLM">SLM</option>
+        </InputSelect>
+        <ValidationMessage For="() => SelectedItem.ATMRServiceType"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>ATM</label>
+        <Select2 Datasource="Atms.Select(x=>new SelectListItem() { Text=x.Text, Value=x.Value })"
+                 Id="From_Atm_DDL" @bind-Value="SelectedItem.ATMId"></Select2>
+        <ValidationMessage For="() => SelectedItem.ATMId"></ValidationMessage>
+    </div>
+    @if (SelectedItem.ATMRServiceType == ATMRServiceType.ATMR)
+    {
+        <div class="form-group">
+            <label>Cash Source</label>
+        
+            <InputSelectNumeric class="form-control"  @bind-Value="SelectedItem.CashSourceBranchId">
+                @if (CashSources != null)
+                {
+                    @foreach (var item in CashSources.Where(x => x != null))
+                    {
+		                    <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </InputSelectNumeric>
+            <ValidationMessage For="() => SelectedItem.CashSourceBranchId"></ValidationMessage>
+        </div>
+
+        <div class="form-group">
+            <label>Packetwise Denomination</label>
+            <div class="input-group">
+                <InputNumber class="form-control" @bind-Value="SelectedItem.Currency500x"></InputNumber>
+                <div class="input-group-append"><span class="input-group-text">x500</span></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-group">
+                <InputNumber class="form-control" @bind-Value="SelectedItem.Currency1000x"></InputNumber>
+                <div class="input-group-append"><span class="input-group-text">x1000</span></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="input-group">
+                <InputNumber class="form-control" @bind-Value="SelectedItem.Currency5000x"></InputNumber>
+                <div class="input-group-append"><span class="input-group-text">x5000</span></div>
+            </div>
+        </div>
+    }
+    <div class="form-group">
+        <label>Timeline</label><br />
+        <DatePicker Id="start-date" @bind-Value="SelectedItem.Deadline"
+                    style="max-width: 175px"></DatePicker>
+        <ValidationMessage For="() => SelectedItem.Deadline"></ValidationMessage>
+    </div>
+</InputForm>

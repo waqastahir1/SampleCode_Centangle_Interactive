@@ -1,0 +1,319 @@
+﻿@using SOS.OrderTracking.Web.Shared.ViewModels
+@using SOS.OrderTracking.Web.Shared
+
+<style>
+    .table th, .table td {
+        vertical-align: middle;
+        text-align: center
+    }
+</style>
+<table class="table" style="overflow-x: auto; width: max-content;">
+    <thead>
+        <tr>
+            <th>
+                Shipment Code
+            </th>
+            <th>
+                Created By
+            </th>
+            <th>
+                Date
+            </th>
+            <th>
+                Collection Branch
+            </th>
+            <th>
+                Delivery Branch
+            </th>
+            <th>
+                Billing Branch
+            </th>
+
+            <th>
+                Crew
+            </th>
+            <th>
+                Amount
+            </th>
+
+            <AuthorizeView Roles="BankBranch,BankHybrid, BankBranchManager, BankCPC, BankCPCManager">
+                <th>
+                    Approval State
+                </th>
+            </AuthorizeView>
+            <th>
+                State
+            </th>
+            <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                <th>
+                    Shipment Type
+                </th>
+                <th>
+                    Status
+                </th>
+            </AuthorizeView>
+            <th>
+                Required Collection Time
+            </th>
+            <th>
+                Required Delivery Time
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Items)
+        {
+            <tr>
+                <td>
+                    @item.ShipmentCode
+                    <br>
+                    <div style="text-align:center">
+                        @if (item.IsFinalized)
+                        {
+                            <span>
+                                <i class="fa fa-lock-alt text-success"></i>
+                            </span>
+                        }
+                        else
+                        {
+                            <AuthorizeView Roles="BankBranch,BankHybrid, BankCPC">
+                                @if (item.FromPartyId == UserPartId && !item.ConsignmentStatus.HasFlag(ConsignmentStatus.InvalidShipment))
+                                {
+                                    <button class="btn btn-xs btn-danger @(item.ConsignmentStateType == ConsignmentDeliveryState.ReachedPickup? "blinking":"")" @onclick="async () => await FinalizeShipment.InvokeAsync(item.Id)">Finalize It</button>
+                                }
+                                else
+                                {
+                                    <span>
+                                        <i class="fa fa-lock-open-alt text-danger"></i>
+                                    </span>
+                                }
+
+                            </AuthorizeView>
+
+                            <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, BankBranchManager, BankCPCManager">
+                                <span>
+                                    <i class="fa fa-lock-open-alt text-danger"></i>
+                                </span>
+                            </AuthorizeView>
+                        }
+                    </div>
+                </td>
+                <td>
+                    @item.CreatedBy
+                </td>
+                <td>
+                    @{
+                        string dateTime = item.CreatedAt.Date == DateTime.Today ?
+                        "Today " + item.CreatedAt.ToString("HH:mm") : item.CreatedAt.ToString("dd-MM-yy HH:mm");
+                    }
+                    <span class="text-dark-50 mt-2 float-left w-100 font-weight-bold font-size-sm">@dateTime</span>
+                </td>
+                <td>
+                    @item.FromPartyCode-@item.FromPartyName
+                </td>
+                <td>
+                    @item.ToPartyCode-@item.ToPartyName
+                    <br>
+                    @if (item.ChangedDropOff != null)
+                    {
+                        if (item.ChangedDropOff.IsApproved)
+                        {
+                            <a class="label label-inline label-light-warning font-weight-bolder" title='@(item.ChangedDropOff.ToPartyCode+"-"+item.ChangedDropOff.ToPartyName)'>
+                                Previous Dropoff
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="label label-inline blinking label-light-warning font-weight-bolder" title='@(item.ChangedDropOff.ToPartyCode+"-"+item.ChangedDropOff.ToPartyName)'>
+                                New Dropoff Pending For Approval
+                            </a>
+                        }
+                    }
+                </td>
+
+                <td>
+                    @item.BillingRegion
+                </td>
+
+                <td>
+                    @{
+                        var assignment = item.DeliveryStates.FirstOrDefault(x => x.ConsignmentStateType == ConsignmentDeliveryState.CrewAssigned);
+                        var inVault = item.Deliveries.Any(x => x.DeliveryState == ConsignmentDeliveryState.InTransit && (x.OrganizationType == OrganizationType.Vault || x.OrganizationType == OrganizationType.VaultOnWheels));
+                    }
+                    @if (assignment != null && assignment.Status == StateTypes.Confirmed)
+                    {
+                        @foreach (var delivery in item.Deliveries)
+                        {
+                            <div class="d-flex flex-column flex-lg-fill">
+                                <span class='@(delivery.DeliveryState  == ConsignmentDeliveryState.InTransit ?"font-weight-bolder":"")'
+                          style='color:@(delivery.DeliveryState  == ConsignmentDeliveryState.InTransit ?"#1555ea":"gray"); font-size: 0.9rem; cursor: pointer;'
+                          @onclick="()=> ShowCrew.InvokeAsync(delivery.CrewId)">@delivery.CrewName</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                            <div class="d-flex flex-column flex-lg-fill">
+                                <btn @onclick="() => AssignCrewClicked.InvokeAsync(new Tuple<int, int, int>( item.Id, item.Deliveries.First().Id, item.Deliveries.First().CrewId.GetValueOrDefault()))"
+                             class="font-weight-bolder" style="color:#1555ea; font-size: 0.9rem; cursor: pointer;">Assign a Crew</btn>
+                            </div>
+                        </AuthorizeView>
+                    }
+                </td>
+                <td>
+                    @if (item.CurrencySymbol == CurrencySymbol.MixCurrency || item.CurrencySymbol == CurrencySymbol.PrizeBond || item.CurrencySymbol == CurrencySymbol.Other)
+                    {
+                        <a class="d-flex flex-column text-dark-50">
+                            <span class="font-weight-bolder font-size-xs">@item.CurrencySymbol.ToString()</span>
+                            <span class="font-weight-bolder text-dark font-size-h7">
+                                @item.AmountPKR.ToString("N0")
+                            </span>
+
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="d-flex flex-column text-dark-50">
+                            <span class="font-weight-bolder font-size-xs">@item.CurrencySymbol.ToString()</span>
+                            <span class="font-weight-bolder text-dark font-size-h7">
+                                @item.Amount.ToString("N0")
+                            </span>
+
+                        </a>
+                    }
+                </td>
+
+                <AuthorizeView Roles="BankBranch,BankHybrid, BankBranchManager, BankCPC, BankCPCManager">
+                    <td>
+                        @if (item.OriginPartyId == UserPartId)
+                        {
+                            @if (@item.ApprovalState.HasFlag(ConsignmentApprovalState.Draft))
+                            {
+                                <AuthorizeView Roles="BankBranchManager,BankHybrid, BankCPCManager" Context='_p'>
+                                    <small @onclick='()=> OnApprovalStateClicked.InvokeAsync(new Tuple<int,ConsignmentApprovalState> (item.Id, ConsignmentApprovalState.Approved))'
+                               class="btn btn-xs btn-pill blinking" style="color:red;border-color:red;">Approval Pending</small>
+                                </AuthorizeView>
+                                <AuthorizeView Roles="BankBranch,BankHybrid, BankCPC" Context='_c'>
+                                    <small class="btn btn-xs btn-pill blinking" style="color:red;border-color:red;">Approval Pending</small>
+                                </AuthorizeView>
+                            }
+                            else if (@item.ApprovalState == ConsignmentApprovalState.Approved)
+                            {
+                                <small class="btn btn-xs btn-pill" style="color: #1fa924; border-color: #1fa924;">Approved</small>
+                            }
+                            else
+                            {
+                                <small class="btn btn-xs btn-pill" style="color:#eb1b1b;border-color:#eb1b1b;" data-toggle="tooltip" title="@item.Comments">Declined</small>
+                            }
+                        }
+                    </td>
+                </AuthorizeView>
+
+                <td>
+                    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, SOS-Headoffice-Billing">
+                        <a onclick="switchTab('#__delivery_timeline_@item.Id', '@item.Id')" style="height:auto;"
+                       class="label label-inline @(item.ConsignmentStateType == ConsignmentDeliveryState.Created ? "blinking": "") label-light-@(item.ConsignmentStateType == ConsignmentDeliveryState.Delivered?"success": item.ConsignmentStateType < ConsignmentDeliveryState.InTransit ?"danger":"warning") font-weight-bolder">
+                            @(inVault ? "In Vault" : EnumHelper.GetDisplayValue(item.ConsignmentStateType))
+                        </a>
+                    </AuthorizeView>
+
+                    <AuthorizeView Roles="BankBranch,BankHybrid, BankBranchManager, BankCPC, BankCPCManager,BANK">
+                        <a onclick="switchTab('#__delivery_timeline_@item.Id', '@item.Id')" style="height:auto;"
+                       class="label label-inline label-light-@(item.ConsignmentStateType == ConsignmentDeliveryState.Delivered?"success": item.ConsignmentStateType < ConsignmentDeliveryState.InTransit ?"danger":"warning") font-weight-bolder">
+                            @(inVault ? "In Vault" : EnumHelper.GetDisplayValue(item.ConsignmentStateType))
+                        </a>
+                    </AuthorizeView>
+                </td>
+                <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                    <td>
+                        @if (@item.ShipmentType > ShipmentType.Unknown)
+                        {
+                            <span> @item.ShipmentType</span>
+                        }
+                    </td>
+                    <td>
+                        <span class="font-weight-bolder text-dark font-size-xs">
+                            @if (@item.ConsignmentStatus == ConsignmentStatus.TobePosted)
+                            {
+                                <small class="btn btn-xs btn-pill" style="color:#d4951c;border-color:#d4951c;">To be pushed</small>
+                            }
+                            else if (@item.ConsignmentStatus == ConsignmentStatus.Pushing)
+                            {
+                                <small class="btn btn-xs btn-pill" style="color:#3493cf;border-color:#3493cf;">Pushing</small>
+                            }
+                            else if (@item.ConsignmentStatus == ConsignmentStatus.Pushed)
+                            {
+                                <small class="btn btn-xs btn-pill" style="color: #1fa924; border-color: #1fa924;">Pushed</small>
+                            }
+                            else if (@item.ConsignmentStatus == ConsignmentStatus.PushingFailed)
+                            {
+                                <small class="btn btn-xs btn-pill" style="color:#eb1b1b;border-color:#eb1b1b;" data-toggle="tooltip" title="@item.PostingMessages">Pushing Failed</small>
+                            }
+                            else if (@item.ConsignmentStatus == ConsignmentStatus.DuplicateSeals)
+                            {
+                                <small class="btn btn-xs btn-pill" style="color:#eb1b1b;border-color:#eb1b1b;" data-toggle="tooltip" title="@item.PostingMessages">Duplicate Seals</small>
+                            }
+                            else
+                            {
+                                <small class="btn btn-xs btn-pill" style="color:#3493cf;border-color:#3493cf;">@item.ConsignmentStatus</small>
+                            }
+                        </span>
+                    </td>
+                </AuthorizeView>
+                <td>
+                    @item.PlanedCollectionTime
+                </td>
+                <td>
+                    @item.PlanedDeliveryTime
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    [Parameter]
+    public List<ConsignmentListViewModel> Items { get; set; }
+
+    [Parameter]
+    public string AmountInWords { get; set; }
+
+    [Parameter]
+    public string UserName { get; set; }
+
+    [Parameter]
+    public int UserPartId { get; set; }
+
+
+    [Parameter]
+    public EventCallback<int?> ShowCrew { get; set; }
+
+    [Parameter]
+    public EventCallback<Tuple<int, int, int>> AssignCrewClicked { get; set; }
+
+    [Parameter]
+    public EventCallback<Tuple<int, int, int>> EditBranch { get; set; }
+
+    [Parameter]
+    public EventCallback<Tuple<int, string, string, int?, int>> ChangeDropoffBranch { get; set; }
+
+    [Parameter]
+    public EventCallback<Tuple<int, string, string, int?, int>> ApproveChangedDropoffBranch { get; set; }
+
+    [Parameter]
+    public EventCallback<Tuple<int, int>> VaultIt { get; set; }
+
+    [Parameter]
+    public EventCallback<Tuple<int, double, DataRecordStatus>> UpdateDistance { get; set; }
+
+    [Parameter]
+    public EventCallback<Tuple<int, ConsignmentApprovalState>> OnApprovalStateClicked { get; set; }
+
+
+    [Parameter]
+    public EventCallback<int> FinalizeShipment { get; set; }
+
+}

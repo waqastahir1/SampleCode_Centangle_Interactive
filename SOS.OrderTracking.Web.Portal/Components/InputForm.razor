@@ -1,0 +1,115 @@
+﻿
+@if (SelectedItem != null)
+{
+    <div class="offcanvas offcanvas-right p-10 offcanvas-on" style="z-index:@ZIndex !important; width:@Width">
+        <div class="offcanvas-header d-flex align-items-center justify-content-between pb-7" kt-hidden-height="47" style="">
+            <h4 class="font-weight-bold m-0">
+                @Heading
+            </h4>
+            <a @onclick="OnCancel"
+               class="btn btn-xs btn-icon btn-light btn-hover-warning">
+                <i class="fal fa-lg fa-times"></i>
+            </a>
+        </div>
+        @{
+            var wrapper = IsBusy ? "overlay-wrapper" : "";
+            var overlay = IsBusy ? "overlay overlay-block rounded" : "";
+        }
+        <div class="@overlay">
+
+            <div class="@wrapper" style="min-height:150px;">
+                <Notification Content="@Error" Type="@NotificationCssClass.Danger"></Notification>
+                <EditForm Model="SelectedItem" OnValidSubmit="OnValidSubmit" OnInvalidSubmit="OnInvalidSubmit" autocomplete="new-password" id='primaryForm'  name='primaryForm' >
+                    <DataAnnotationsValidator></DataAnnotationsValidator>
+                    <ValidationSummary></ValidationSummary>
+                    <!--end::Header-->
+                    <!--begin::Content-->
+                    <div class="offcanvas-content" id="@Id">
+                        <!--begin::Wrapper-->
+                        <div class="offcanvas-wrapper mb-5 scroll-pull scroll ps ps--active-y">
+                            @ChildContent
+                        </div>
+                        @if (OnValidSubmit.HasDelegate)
+                        {
+                            <div class="offcanvas-footer">
+                                <div class="text-right">
+                                    @if (!string.IsNullOrEmpty(AdditionalButtonText))
+                                    {
+                                        <button type="button" @onclick="OnAdditionalButtonClick" class="btn btn-primary mr-2">@AdditionalButtonText</button>
+                                    }
+                                    @if (!HideSaveButton)
+                                    {
+                                    <button type="submit" onclick='onSaveBtnClick(this)' class="btn btn-warning mr-2" value="Save">Save</button>
+                                    }
+                                    @if (!HideCancelButton)
+                                    {
+                                    <button type="button" @onclick="OnCancel" class="btn btn-danger" value="Cancel">@CancelButtonText</button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        <!--end::Purchase-->
+                    </div>
+                </EditForm>
+            </div>
+            @if (IsBusy)
+            {
+                <div class="overlay-layer rounded bg-primary-o-20">
+                    <div class="spinner spinner-primary"></div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="offcanvas-overlay"></div>
+}
+
+@code{
+
+    public InputForm()
+    {
+        ZIndex = 500;
+    }
+    [Parameter]
+    public string CancelButtonText { get; set; } = "Cancel";
+    [Parameter]
+    public string AdditionalButtonText { get; set; }
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter]
+    public object SelectedItem { get; set; }
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnInvalidSubmit { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
+
+    [Parameter]
+    public string Heading { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Error { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+    [Parameter]
+    public EventCallback OnAdditionalButtonClick { get; set; }
+
+    [Parameter]
+    public int ZIndex { get; set; }
+    [Parameter]
+    public bool HideCancelButton { get; set; }
+    [Parameter]
+    public bool HideSaveButton { get; set; }
+    
+    [Parameter]
+    public string Width { get; set; } = "450px";
+
+}

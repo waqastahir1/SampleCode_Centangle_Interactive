@@ -1,0 +1,35 @@
+﻿@{
+    var wrapper = IsBusy ? "overlay-wrapper" : "";
+    var overlay = IsBusy ? "overlay overlay-block rounded" : "";
+}
+<div class="@overlay">
+
+    <div class="@wrapper" style="min-height:80vh;">
+        <div class="d-flex flex-column-fluid mt-4 @Classes">
+            <!--begin::Container-->
+            <div class="container-fluid"> 
+                <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification> 
+                    @ChildContent 
+            </div>
+        </div>
+    </div>
+    @if (IsBusy)
+    {
+        <div class="overlay-layer rounded bg-primary-o-20">
+            <div class="spinner spinner-primary"></div>
+        </div>
+    }
+</div>
+@code {
+    [Parameter]
+    public bool IsBusy { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Error { get; set; }
+
+    [Parameter]
+    public string Classes { get; set; }
+}

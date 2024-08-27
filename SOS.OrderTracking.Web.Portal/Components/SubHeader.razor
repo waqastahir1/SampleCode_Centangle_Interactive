@@ -1,0 +1,71 @@
+﻿
+<div class="subheader py-2 py-lg-4  subheader-solid" id="kt_subheader" style="z-index:@ZIndex;">
+    <div class=" container-fluid  d-flex align-items-center justify-content-between flex-wrap flex-sm-nowrap">
+        <div class="d-flex align-items-center flex-wrap mr-2">
+            <h5 class="text-dark font-weight-bold mt-2 mb-2 mr-5">
+                @Heading
+            </h5>
+            <div class="subheader-separator subheader-separator-ver mt-2 mb-2 mr-5 bg-gray-200"></div>
+            <div class="d-flex align-items-center" id="kt_subheader_search" placeholder="Search..." @bind-value="SearchKey"  @bind-value:event="oninput">
+                <span class="text-dark-50 font-weight-bold" id="kt_subheader_total" >
+                    @(RowsCount > 0 ? RowsCount + " Total":"" )
+                </span>
+                @if (!HideSearch)
+                {
+                    var temp = string.Empty;
+                <EditForm  Model="temp" OnValidSubmit="async ()=>await SearchString.InvokeAsync(SearchKey)" class="ml-5">
+                    <div class="input-group input-group-sm input-group-solid" style="max-width: 175px">
+                        <input type="search" class="form-control" id="kt_subheader_search_form" placeholder="Search...">
+                        <div class="input-group-append">
+                            <span class="input-group-text">
+                                <span @onclick="async ()=>await SearchString.InvokeAsync(SearchKey)" class=@(string.IsNullOrWhiteSpace(SearchKey)?  "svg-icon":"btn btn-sm btn-danger")>
+                                    <i class="fa fa-search"></i>
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </EditForm>
+                }
+            </div>
+        </div>
+        <div class="d-flex align-items-center">
+            @this.ChildContent 
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    public string Heading { get; set; }
+
+    private string _searchKey;
+
+    [Parameter]
+    public string SearchKey
+    {
+        get { return _searchKey; }
+        set
+        {
+            if (_searchKey != value)
+            {
+                _searchKey = value;
+                if (string.IsNullOrWhiteSpace(value))
+                    SearchString.InvokeAsync(value);
+            }
+        }
+    }
+    [Parameter]
+    public bool HideSearch { get; set; } = false;
+
+    [Parameter]
+    public int RowsCount { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SearchString { get; set; }
+    [Parameter]
+    public string ZIndex { get; set; } = "95";
+}

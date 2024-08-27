@@ -1,0 +1,122 @@
+﻿
+@using SOS.OrderTracking.Web.Shared.ViewModels.Gaurds
+@using SOS.OrderTracking.Web.Client.Components
+@inject HttpClient Http
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Client.Services.Gaurding
+@inherits APICrudBaseV2<GaurdFormViewModel, GaurdListViewModel, int, GaurdAdditionalValueViewModel, GaurdService>
+@attribute [Authorize]
+
+<SubHeader Heading="Gaurds" RowsCount="@TotalRows">
+    <ChildContent>
+        <a @onclick="()=> OnItemClicked(0)" class="btn btn-light-warning font-weight-bold ml-2">
+            Allocate Gaurd
+        </a>
+        <a @onclick="()=> PubSub.Hub.Default.Publish<Gaurd>(null)" class="btn btn-secondary font-weight-bold ml-2">
+            <span><i class="fa fa-times"></i></span>
+        </a>
+    </ChildContent>
+</SubHeader>
+@*<EditForm Model="this">
+        <div class="row">
+            <div class="col-3">
+
+            </div>
+        </div>
+
+    </EditForm>*@
+<FluentCard IsBusy="@IsTableBusy">
+    <div class="row">
+        <div class="col-6 text-black bold">
+            <h6>Branch Name: @BranchName </h6>
+        </div>
+    </div>
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                @*<th>Id</th>*@
+                <th>Name</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items != null)
+            {
+                @foreach (var item in Items)
+                {
+                    <tr>
+                        @*<td>
+                                @item.Id
+                            </td>*@
+                        <td>@item.Name</td>
+                        <td>@item.StartDate.ToString("dd-MM-yyyy")</td>
+                        <td>@item.EndDate?.ToString("dd-MM-yyyy")</td>
+                        <td style="padding:2px; text-align:right">
+                            <a class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;" @onclick="() => OnItemClicked(item.RelationshipId)">
+                                <i class="flaticon2-pen"></i>
+                            </a>
+                            @*<a class="btn btn-icon btn-light-danger btn-sm mr-2" href='admin/crewmembers/@item.Id'>
+                                    <i class="fa fa-user-friends"></i>
+                                </a>*@
+                        </td>
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>
+
+
+<InputForm SelectedItem="SelectedItem"
+           IsBusy="IsModalBusy"
+           Heading="Gaurd Form"
+           OnCancel="() => { SelectedItem = null; ValidationError = null;}"
+           Error="@ValidationError"
+           OnValidSubmit="OnFormSubmit">
+
+    @{ SelectedItem.BranchId = BranchId;}
+    @if (SelectedItem.RelationshipId == 0)
+    {
+        <div class="form-group">
+            <label>Employee</label>
+            @*<RadzenDropDown AllowClear="true" TValue="int" class="form-control"
+                Data="@Gaurds" Placeholder="Select an Employee" AllowFiltering="true"
+                TextProperty="Text" ValueProperty="IntValue" @bind-Value="SelectedItem.Id" />
+            *@
+            <Select2 @bind-Value="SelectedItem.Id" Datasource="Gaurds" DisplayName="Select an employee" Id="_gaurds"></Select2>
+            <ValidationMessage For="() => SelectedItem.Id"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <label>Start Date</label>
+            @*<RadzenDatePicker TValue="DateTime" @bind-Value="@SelectedItem.StartDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />*@
+            <DatePicker Placeholder="Start Date" @bind-Value="@SelectedItem.StartDate" Id="__startDate1" />
+            <ValidationMessage For="() => SelectedItem.StartDate"></ValidationMessage>
+        </div>
+    }
+    else
+    {
+        <div class="form-group">
+            <label>Name:</label><br />
+            <label class="form-control">@SelectedItem.Name</label>
+        </div>
+        <div class="form-group">
+            <label>Start Date:</label><br />
+            <label class="form-control">@SelectedItem.StartDate</label>
+        </div>
+
+
+    }
+<div class="form-group">
+    <label>End Date</label>
+    @*<RadzenDatePicker TValue="DateTime?" @bind-Value="@SelectedItem.EndDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />*@
+    <DatePicker Placeholder="End Date" @bind-Value="@SelectedItem.EndDate" Id="__endDate1" />
+    <ValidationMessage For="() => SelectedItem.EndDate"></ValidationMessage>
+</div>
+</InputForm>

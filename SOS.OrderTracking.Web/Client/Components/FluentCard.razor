@@ -1,0 +1,30 @@
+﻿
+
+@{
+    var wrapper = IsBusy ? "overlay-wrapper" : "";
+    var overlay = IsBusy ? "overlay overlay-block rounded" : "";
+}
+<div class="@overlay">
+    <div class="@wrapper" style="min-height:80vh;">
+        <div class="d-flex flex-column-fluid">
+            <div class="container-fluid">
+                <div class="card-body">
+                    @this.ChildContent
+                </div> 
+            </div>
+        </div>
+        @if (IsBusy)
+        {
+            <div class="overlay-layer rounded bg-primary-o-20">
+                <div class="spinner spinner-primary"></div>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
+}

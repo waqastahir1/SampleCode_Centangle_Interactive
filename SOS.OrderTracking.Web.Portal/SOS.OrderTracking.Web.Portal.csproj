@@ -1,0 +1,106 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>aspnet-SOS.OrderTracking.Web.Portal-8947ABCE-D9A3-45C7-BC98-4B3718F057E3</UserSecretsId>
+		<Version>4.5.3</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Compile Remove="Services\Reports\**" />
+		<Content Remove="Services\Reports\**" />
+		<EmbeddedResource Remove="Services\Reports\**" />
+		<None Remove="Services\Reports\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="wwwroot\Reports\ConsignmentReceipt.rdlc" />
+		<Content Remove="wwwroot\Reports\ConsignmentReceiptMulti.rdlc" />
+		<Content Remove="wwwroot\Reports\ConsignmentReceiptPrizebond.rdlc" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Areas\Identity\Pages\Account\Signin.cshtml" />
+		<None Include="Areas\Identity\Pages\Account\LogOut.cshtml" />
+		<None Include="wwwroot\assets\icons\car.svg" />
+		<None Include="wwwroot\assets\js\BlazorNotifications.js" />
+		<None Include="wwwroot\assets\js\bootstrap-datepicker.js" />
+		<None Include="wwwroot\assets\js\custom.js" />
+		<None Include="wwwroot\assets\js\pages\custom\login\login.js" />
+		<None Include="wwwroot\assets\js\pages\custom\login\login.min.js" />
+		<None Include="wwwroot\assets\js\scripts.bundle.js" />
+		<None Include="wwwroot\assets\js\scripts.bundle.min.js" />
+		<None Include="wwwroot\assets\media\misc\inflicted.ogg" />
+		<None Include="wwwroot\assets\plugins\custom\prismjs\prismjs.bundle.js" />
+		<None Include="wwwroot\assets\plugins\datatable\datatables.bundle.js" />
+		<None Include="wwwroot\assets\plugins\global\fonts\flaticon2\Flaticon2.svg" />
+		<None Include="wwwroot\assets\plugins\global\fonts\flaticon2\Flaticon2.woff2" />
+		<None Include="wwwroot\assets\plugins\global\fonts\flaticon\Flaticon.svg" />
+		<None Include="wwwroot\assets\plugins\global\fonts\keenthemes-icons\Ki.svg" />
+		<None Include="wwwroot\assets\plugins\global\fonts\keenthemes-icons\Ki.woff2" />
+		<None Include="wwwroot\assets\plugins\global\fonts\line-awesome\la-brands-400.svg" />
+		<None Include="wwwroot\assets\plugins\global\fonts\line-awesome\la-brands-400.woff2" />
+		<None Include="wwwroot\assets\plugins\global\fonts\line-awesome\la-regular-400.svg" />
+		<None Include="wwwroot\assets\plugins\global\fonts\line-awesome\la-regular-400.woff2" />
+		<None Include="wwwroot\assets\plugins\global\fonts\line-awesome\la-solid-900.svg" />
+		<None Include="wwwroot\assets\plugins\global\fonts\line-awesome\la-solid-900.woff2" />
+		<None Include="wwwroot\assets\plugins\global\plugins.bundle.js" />
+		<None Include="wwwroot\fonts\webfonts\fa-brands-400.woff2" />
+		<None Include="wwwroot\fonts\webfonts\fa-duotone-900.woff2" />
+		<None Include="wwwroot\fonts\webfonts\fa-light-300.woff2" />
+		<None Include="wwwroot\fonts\webfonts\fa-regular-400.woff2" />
+		<None Include="wwwroot\fonts\webfonts\fa-solid-900.woff2" />
+		<None Include="wwwroot\Reports\ConsignmentReceiptPrizebond.rdlc">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="wwwroot\Reports\ConsignmentReceipt.rdlc">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="wwwroot\Reports\ConsignmentReceiptMulti.rdlc">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Blazor.Extensions.Notifications" Version="0.1.3" />
+		<PackageReference Include="BoldReports.AspNet.Core" Version="3.2.23" />
+		<PackageReference Include="BoldReports.Net.Core" Version="3.2.23" />
+		<PackageReference Include="EPPlus" Version="5.8.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.0-rc.1.21452.15" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0-rc.1.21452.15" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0-rc.1.21452.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-rc.1.21452.10">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
+		<PackageReference Include="PubSub" Version="4.0.1" />
+		<PackageReference Include="QRCoder" Version="1.4.1" />
+		<PackageReference Include="Radzen.Blazor" Version="3.10.0" />
+		<PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
+		<PackageReference Include="iTextSharp" Version="5.5.13.2" />
+		<PackageReference Include="ClosedXML" Version="0.95.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SOS.OrderTracking.Web.Common\SOS.OrderTracking.Web.Common.csproj" />
+		<ProjectReference Include="..\SOS.OrderTracking.Web\Shared\SOS.OrderTracking.Web.Shared.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update="wwwroot\Images\SOSLogo.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\Reports\CrewReport.rdl">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Properties\PublishProfiles\" />
+	</ItemGroup>
+
+</Project>

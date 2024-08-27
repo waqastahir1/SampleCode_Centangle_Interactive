@@ -1,0 +1,181 @@
+﻿@page "/admin/appusers"
+@using SOS.OrderTracking.Web.Shared
+@using SOS.OrderTracking.Web.Shared.ViewModels.UserRoles
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Client.Services.Admin
+@using SOS.OrderTracking.Web.Shared.ViewModels.Users
+@inject HttpClient Http
+@inherits APICrudBaseV2<InternalUsersViewModel, InternalUsersListModel, string, UserAdditionalValueViewModel, InternalUserService>
+@attribute [Authorize(Roles = "SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin")]
+
+<SubHeader Heading="Internal Users" SearchString="SearchString">
+    <ChildContent>
+        <div class="d-flex align-items-center">
+            <a @onclick="() => OnItemClicked(null)" class="btn btn-light-warning font-weight-bold ml-2">
+                Create New User
+            </a>
+        </div>
+    </ChildContent>
+</SubHeader>
+<FluentCard IsBusy="@IsTableBusy">
+
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Emp Code</th>
+                <th>Name</th>
+                <th>User Name</th>
+                <th>User Designation/Role</th>
+                <th>Organization Name</th>
+                <th>Station</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items == null)
+            {
+                <tr>
+                    <td colspan="3"> <p><em>Loading...</em></p></td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Items)
+                {
+        <tr>
+            <td>
+                @item.ShortName
+            </td>
+            <td>
+                @item.Name
+            </td>
+            <td>@item.UserName</td>
+            <td>@item.RoleName</td>
+            <td>@item.OrganizationName</td>
+            <td>@item.Station</td>
+            <td style="padding:2px; text-align:right">
+                <a class="btn btn-icon btn-light-danger btn-sm mr-2" style="cursor:pointer;" @onclick="() => OnItemClicked(item.Id)">
+                    <i class="flaticon2-pen"></i>
+                </a>
+                <a class="btn btn-icon btn-light-danger btn-sm mr-2" @onclick="async () => OnPasswordChangeClicked(item.Id)">
+                    <i class="fas fa-key-skeleton"></i>
+                </a>
+            </td>
+
+        </tr>
+                }
+            }
+
+        </tbody>
+
+    </table>
+
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>
+
+
+<InputForm SelectedItem="@SelectedItem"
+           OnCancel="()=> SelectedItem = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="OnFormSubmit"
+           Heading="Internal User Form">
+
+    <div class="form-group">
+        <label>Roles</label>
+        <Radzen.Blazor.RadzenDropDown 
+                                      TValue="IEnumerable<string>"
+                                      Multiple="true"
+                                      ValueProperty="RoleId"
+                                      TextProperty="RoleName"
+                                      Data="Roles"
+                                      @bind-Value="multipleValues"
+                                      Change="@(args => Change(args))"
+                                      Style="width:100%;"
+                                      />
+        <ValidationMessage For="() => SelectedItem.RoleId"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>User Name</label>
+        <InputText @bind-Value="SelectedItem.UserName" type="text" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => SelectedItem.UserName"></ValidationMessage>
+    </div>
+    @if (SelectedItem.Id == null)
+    {
+        <div class="form-group">
+            <label>Password</label>
+            <InputText @bind-Value="SelectedItem.Password" type="Password" class="form-control" autocomplete="new-password" />
+            <ValidationMessage For="() => SelectedItem.Password"></ValidationMessage>
+        </div>
+    }
+    <div class="form-group">
+        <label>Employee</label>
+        <Select2 @bind-Value="SelectedItem.PartyId" Datasource="Employees" Id="__party" />
+        <ValidationMessage For="() => SelectedItem.PartyId"></ValidationMessage>
+    </div>
+    @*<div class="form-group">
+            <label>Roles</label>
+            <Select2 @bind-Value="SelectedItem.RoleId" Datasource="RoleTypes" id="__role" />
+            <ValidationMessage For="() => SelectedItem.RoleId"></ValidationMessage>
+        </div>*@
+    <div class="form-group">
+        <div class="form-group row">
+            <label class="col-4 col-form-label">User Enabled</label>
+            <div class="col-6">
+                <span class="switch switch-outline switch-icon switch-success">
+                    <label>
+                        <input type="checkbox" @bind="SelectedItem.IsEnabled" name="select">
+                        <span></span>
+                    </label>
+                </span>
+            </div>
+        </div>
+    </div>
+</InputForm>
+<InputForm SelectedItem="@ChangePasswordViewModel"
+           IsBusy="@IsModalBusy"
+           Heading="Change Password Form"
+           ZIndex="1101"
+           Error="@ValidationError"
+           OnCancel="()=> ChangePasswordViewModel = null"
+           OnValidSubmit="@ChangePassword">
+
+    <div class="form-group">
+        <label>New Password</label>
+        <InputText @bind-Value="ChangePasswordViewModel.Password" type="Password" class="form-control" autocomplete="new-password" />
+        <ValidationMessage For="() => ChangePasswordViewModel.Password"></ValidationMessage>
+    </div>
+
+</InputForm>
+@code{
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authStateTask { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await authStateTask;
+            var user = authState.User;
+            var userName = user.Identity.Name;
+
+            OnSelectedItemCreated += (x) =>
+            {
+                if (SelectedItem.Id != null)
+                {
+                    SelectedItem.Password = "******";
+                }
+            };
+
+        }
+    }
+
+
+}
+
+

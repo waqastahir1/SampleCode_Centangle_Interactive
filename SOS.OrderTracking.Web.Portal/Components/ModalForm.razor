@@ -1,0 +1,115 @@
+﻿
+@if (SelectedItem != null)
+{
+    
+<!-- Modal-->
+<div class="modal fade show" id="exampleModal" data-backdrop="static" tabindex="-1" role="dialog" style='display:block;' aria-labelledby="staticBackdrop" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl .modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel"> @Heading</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="OnCancel">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+               <Notification Content="@Error" Type="@NotificationCssClass.Danger"></Notification>
+                        <EditForm class='ml-4' Model="SelectedItem" OnValidSubmit="OnValidSubmit" OnInvalidSubmit="OnInvalidSubmit" >
+             <div class="modal-body">
+             @{
+            var wrapper = IsBusy ? "overlay-wrapper" : "";
+            var overlay = IsBusy ? "overlay overlay-block rounded" : "";
+                }
+                <div class="@overlay">
+
+                    <div class="@wrapper" style="max-height:72vh; overflow-y:auto; overflow-x:hidden">
+                     
+                            <DataAnnotationsValidator></DataAnnotationsValidator>
+                            <ValidationSummary></ValidationSummary>
+                    
+                              @ChildContent
+
+                        
+                    </div>
+                    @if (IsBusy)
+                    {
+                        <div class="overlay-layer rounded bg-primary-o-20">
+                            <div class="spinner spinner-primary"></div>
+                        </div>
+                    }
+                </div>
+        </div>
+           
+                 
+            <div class="modal-footer">
+                 @if (OnValidSubmit.HasDelegate)
+                    {
+                            @if (!string.IsNullOrEmpty(AdditionalButtonText))
+
+                                {
+                                    <button type="button" @onclick="OnAdditionalButtonClick" class="btn btn-bg-primary">@AdditionalButtonText</button>
+                                }
+                                @if (!HideSaveButton)
+                                {
+                                <button type="submit" onclick='onSaveBtnClick(this)' class="btn btn-warning mr-2" value="Save">Save</button>
+                                }
+                                @if (!HideCancelButton)
+                                {
+                                <button type="button" @onclick="OnCancel" class="btn btn-danger" value="Cancel">@CancelButtonText</button>
+                                }
+                    }
+            </div>
+            </EditForm>
+
+
+        </div>
+    </div>
+</div>
+  <div class="offcanvas-overlay"></div>
+}
+
+@code{
+
+    public ModalForm()
+    {
+        ZIndex = 500;
+    }
+    [Parameter]
+    public string CancelButtonText { get; set; } = "Cancel";
+    [Parameter]
+    public string AdditionalButtonText { get; set; }
+    [Parameter]
+    public string Id { get; set; }
+
+    [Parameter]
+    public object SelectedItem { get; set; }
+
+    [Parameter]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter]
+    public EventCallback OnInvalidSubmit { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
+
+    [Parameter]
+    public string Heading { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Error { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+    [Parameter]
+    public EventCallback OnAdditionalButtonClick { get; set; }
+
+    [Parameter]
+    public int ZIndex { get; set; }
+    [Parameter]
+    public bool HideCancelButton { get; set; }
+    [Parameter]
+    public bool HideSaveButton { get; set; }
+}

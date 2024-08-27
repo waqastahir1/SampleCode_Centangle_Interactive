@@ -1,0 +1,188 @@
+﻿@using SOS.OrderTracking.Web.Shared.ViewModels
+@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using SOS.OrderTracking.Web.Client.Components  
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Client.Services.Reports
+@using SOS.OrderTracking.Web.Shared.ViewModels.Reports
+@inherits APICrudBaseV2<CustomerReportViewModel, CustomerReportViewModel, int, CustomerReportIndexViewModel, CustomerReportService>
+@attribute [Authorize]
+
+<SubHeader Heading="Customer Report" RowsCount="@TotalRows" HideSearch="true">
+    <div class="d-flex align-items-center">
+        <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, BankBranch, BankBranchManager, BankCPC, BankCPCManager, BankHybrid">
+            <a href="shipments/2"
+               class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+                <!--!-->
+                <i class="far fa-line-columns"></i>
+            </a>
+        </AuthorizeView>
+        <a href="shipments/0"
+           class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+            <!--!-->
+            <i class="far fa-table"></i>
+        </a>
+    </div>
+</SubHeader>
+<EditForm Model="@this" style="margin-left:1rem;">
+    <div class="row">
+        <div class="col-md-2">
+            <label>From Date</label><br />
+            <DatePicker Id="__fromDate" @bind-Value="FromDate" Placeholder="From Date">
+            </DatePicker>
+        </div>
+        <div class="col-md-2">
+            <label>Thru Date</label><br />
+            <DatePicker Id="__toDate" @bind-Value="ThruDate" Placeholder="Thru Date">
+            </DatePicker>
+        </div>
+        <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+            <div class="col-md-3 col-lg-3 col-xl-3">
+                <label>Bill Branch</label><br />
+                <Select2Ajax AjaxUrl="v1/Common/SearchCustomers"
+                             Id="billBranchId" @bind-Value="BillBranchId"></Select2Ajax>
+            </div> 
+            <div class="col-md-3 text-black bold">
+                <label>Consignment Status</label><br />
+                <InputSelect class="form-control" TValue="string"
+                             @bind-Value="@ConsignmentStatus">
+                    @foreach (var item in ConsignmentStatusTypes)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => ConsignmentStatus"></ValidationMessage>
+            </div>
+        </AuthorizeView>
+
+        <div class="col-md-2">
+
+            <br />
+            <div class="btn-group">
+                <button type="button" class="btn btn-light-primary" @onclick="ShowData">Show Report</button>
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split " data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                @{string pdf = "pdf"; string word = "docx"; string excel = "xls"; string csv = "csv";}
+                <div class="dropdown-menu min-w-1px">
+                    <a class="dropdown-item" @onclick="async ()=> await DownloadPdf(pdf)"><span class=""><i class="fas fa-file-pdf "></i> Download Pdf</span></a>
+                    <a class="dropdown-item" @onclick="()=>DownloadPdf(word)"><span class=""><i class="fas fa-file-word"></i> Download Word</span></a>
+                    <a class="dropdown-item" @onclick="()=>DownloadPdf(csv)"><span class=""><i class="fas fa-file-csv"></i> Download CSV</span></a>
+                    <a class="dropdown-item" @onclick="()=>DownloadPdf(excel)"><span class=""><i class="fas fa-file-excel"></i> Download Excel</span></a>
+                </div>
+            </div>
+        </div>
+        @*style="color:#F64E60;"*@
+        <div class="row">
+            <div class="col-12">
+                <hr />
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+<FluentCard IsBusy="@IsTableBusy">
+
+    @if (Items == null)
+    {
+        <h5>Select options and click show data</h5>
+        @if (IsModalBusy)
+        {
+            <div class="overlay-layer rounded bg-primary-o-20">
+                <div class="spinner spinner-primary"></div>
+            </div>
+        }
+    }
+    else
+    {
+        if (Items.Count() == 0)
+        {
+            <h4 style="text-align:center; margin:auto;margin-top:150px;">
+                No Consignment found<br />
+                @*<a class="btn btn-secondary font-weight-bold mt-4">
+                        No Consignment found
+                    </a>*@
+            </h4>
+        }
+        else
+        {
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Shipment Code
+                        </th>
+                        <th>
+                            Collection
+                        </th>
+                        <th>
+                            Delivery Branch
+                        </th>
+                        <th>
+                            Collection Time
+                        </th>
+                        <th>
+                            Delivery Time
+                        </th>
+                        <th>
+                            Veh
+                            icle No
+                        </th>
+                        <th>
+                            Amount
+                        </th>
+                        <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                            <th>
+                                Type
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+                            </AuthorizeView>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Items)
+                    {
+                    <tr>
+                        <td>
+                            @item.ShipmentCode
+                        </td>
+                        <td>
+                            @item.PickupBranch
+                        </td>
+                        <td>
+                            @item.DeliveryBranch
+                        </td>
+                        <td>
+                            @item.PickupTime
+                        </td>
+                        <td>
+                            @item.DeliveryTime
+                        </td>
+                        <td>
+                            @item.VehicleNo
+                        </td>
+                        <td>
+                            @item.Amount
+                        </td>
+                        <AuthorizeView Context="c1" Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                            <td>
+                                @item.ShipmentType
+                            </td>
+                            <td>
+                                @item.ConsignmentStatus
+                            </td>
+                            </AuthorizeView>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>

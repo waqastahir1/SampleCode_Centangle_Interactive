@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data\Models\SOSOrderTrackingContext.cs" />
+    <Compile Remove="Migrations\20200706194553_AddedCustomerDetail.cs" />
+    <Compile Remove="Migrations\20200706194553_AddedCustomerDetail.Designer.cs" />
+    <Compile Remove="Migrations\20200731125740_EmployeeAttendance.cs" />
+    <Compile Remove="Migrations\20200731125740_EmployeeAttendance.Designer.cs" />
+    <Compile Remove="Migrations\20200731130052_EmployeeAttendance.cs" />
+    <Compile Remove="Migrations\20200731130052_EmployeeAttendance.Designer.cs" />
+    <Compile Remove="Migrations\20200806050724_RecursiveDeliveries.cs" />
+    <Compile Remove="Migrations\20200806050724_RecursiveDeliveries.Designer.cs" />
+    <Compile Remove="Migrations\20200806050932_RecursiveDeliveries.cs" />
+    <Compile Remove="Migrations\20200806050932_RecursiveDeliveries.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="gmaps-api-net" Version="0.32.0" />
+    <PackageReference Include="FirebaseAdmin" Version="2.1.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.17.0" />
+    <PackageReference Include="Microsoft.AspNetCore.ApiAuthorization.IdentityServer" Version="5.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="5.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.2.0" />
+    <PackageReference Include="ProjNET4GeoAPI" Version="1.4.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="4.1.2" />
+    <PackageReference Include="WebPush" Version="1.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SOS.OrderTracking.Web\Shared\SOS.OrderTracking.Web.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

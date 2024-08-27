@@ -1,0 +1,32 @@
+﻿using System;
+
+namespace SOS.OrderTracking.Web.Portal.GBMS.Models
+{
+    public partial class PblServicesReceivedNoteDetail
+    {
+        public int MasterId { get; set; }
+        public int DetailId { get; set; }
+        public string XServiceCode { get; set; } = null!;
+        public string? XServiceCodeDescription { get; set; }
+        public string? XProject { get; set; }
+        public string? XProjectDescription { get; set; }
+        public decimal? XValue { get; set; }
+        public decimal? XSalesTax { get; set; }
+        public decimal? XFurtherTax { get; set; }
+        public decimal? XOtherCosts { get; set; }
+        public decimal XNetValue { get; set; }
+        public decimal? XOdometer { get; set; }
+        public string? XServiceDetails { get; set; }
+        public string? XAsset { get; set; }
+        public string? XAssetDescription { get; set; }
+        public string? XLocation { get; set; }
+        public string? XLocationDescription { get; set; }
+        public string? XRemarks { get; set; }
+        public string? AddId { get; set; }
+        public string? ModId { get; set; }
+        public DateTime? AddDate { get; set; }
+        public DateTime? ModDate { get; set; }
+        public string? IpAdd { get; set; }
+        public string? IpMod { get; set; }
+    }
+}

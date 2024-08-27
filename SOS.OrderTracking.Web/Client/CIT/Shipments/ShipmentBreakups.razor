@@ -1,0 +1,188 @@
+﻿@page "/shipments/sipmentbreakups"
+
+@using SOS.OrderTracking.Web.Shared.ViewModels
+@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Client.Services.Customers
+@inherits APICrudBaseV2<ShipmentFormViewModel, CitGridListViewModel, int, CitGridAdditionalValueViewModel, ShipmentBreakupsService>
+@attribute [Authorize]
+
+
+
+<SubHeader Heading="CIT Consignment" RowsCount="@TotalRows">
+    <a href="shipments/3"
+       class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="far fa-print"></i>
+    </a>
+    <a href="shipments/0"
+       class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="far fa-table"></i>
+    </a>
+    <a @onclick="()=> LoadItems(true)" class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="far fa-sync-alt"></i>
+    </a>
+</SubHeader>
+
+
+<EditForm Model="this" style="margin-left:1rem;">
+    <div class="row">
+        <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+            <ChildContent Context="m1">
+                <div class="col-3 text-black bold">
+                    <div class="form-group">
+                        <label>Crew</label><br />
+                        <RadzenDropDown AllowClear="true" TValue="int" class="form-control"
+                                        Data="@Crews" Placeholder="Select Crew" AllowFiltering="true"
+                                        TextProperty="Text" ValueProperty="IntValue" @bind-Value="CrewId" />
+                        <ValidationMessage For="() => CrewId"></ValidationMessage>
+                    </div>
+                </div>
+            </ChildContent>
+        </AuthorizeView>
+        <div class="col-3 text-black bold">
+            <label>Start Date</label><br />
+            <RadzenDatePicker TValue="DateTime?" Placeholder="StartDate" @bind-Value="@StartDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+        </div>
+        <div class="col-3 text-black bold">
+            <label>End Date</label><br />
+            <RadzenDatePicker TValue="DateTime?" Placeholder="EndDate" @bind-Value="@EndDate" DateFormat="dd-MM-yyyy" Style="width:100%;box-shadow:none" />
+        </div>
+
+        <div class="col-3 text-black bold">
+            <div class="form-group">
+                <label>Delivery State</label><br />
+                <RadzenDropDown AllowClear="true" TValue="Nullable<int>" class="form-control"
+                                Data="@ConsignmentStateTypes" Placeholder="Select Delivery State" AllowFiltering="true"
+                                TextProperty="Text" ValueProperty="IntValue" @bind-Value="DeliveryStateId" />
+                <ValidationMessage For="() => DeliveryStateId"></ValidationMessage>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+            <ChildContent Context="m2">
+                <div class="col-3 text-black bold">
+                    <div class="form-group">
+                        <label>Bill Branch</label><br />
+                        <Select2Ajax AjaxUrl="v1/Organization/SearchBranches"
+                                     Id="billBranchId" @bind-Value="BillBranchId"></Select2Ajax>
+                        <ValidationMessage For="() => BillBranchId"></ValidationMessage>
+                    </div>
+                </div>
+            </ChildContent>
+        </AuthorizeView>
+    </div>
+</EditForm>
+<FluentCard IsBusy="@IsTableBusy">
+
+    <div class="row">
+        <div class="col-6 text-black bold">
+            <h6>Cit Consignments</h6>
+        </div>
+    </div>
+
+
+    <Notification Content="@Error" Type="NotificationCssClass.Danger"></Notification>
+    @if (Items != null)
+    {
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th @onclick='()=>BaseIndexModel.SortColumn = $"EmployeeName-{InverseState()}"' style="cursor:pointer">
+                        Name
+                        @if (BaseIndexModel.SortColumn?.Split('-').First() == "EmployeeName")
+                        {
+                            if (State)
+                            {
+                                <span><i class="fad fa-sort-up ml-2"></i></span>
+                            }
+                            else
+                            {
+                                <span><i class="fad fa-sort-down ml-2"></i></span>
+                            }
+                        }
+                    </th>
+                  <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                    <th>
+                        Delivery Id
+                    </th>
+                    <th>
+                        Parent Id
+                    </th>
+                    </AuthorizeView>
+                    <th>CrewName</th>
+                    <th>Consignmet date</th>
+                    <th>Status</th>
+                    <th @onclick='()=>BaseIndexModel.SortColumn = $"StartDate-{InverseState()}"' style="cursor:pointer">
+                        Pickup Branch
+                        @if (BaseIndexModel.SortColumn?.Split('-').First() == "StartDate")
+                        {
+                            if (State)
+                            {
+                                <span><i class="fad fa-sort-up ml-2"></i></span>
+                            }
+                            else
+                            {
+                                <span><i class="fad fa-sort-down ml-2"></i></span>
+                            }
+                        }
+                    </th>
+                    @*<Td Key="StartDate" API="@this">Pickup Branch</Td>*@
+                    <th>DropOff Branch</th>
+                    <th>Amount</th>
+                    <td>Type</td>>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Items)
+                {
+                    <tr>
+                        <td>
+                            @item.ShipmentCode
+                        </td>
+                         <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+                        <td>
+                            @item.DeliveryId
+                        </td>
+                        <td>
+                            @item.PreviousId
+                        </td>
+                        </AuthorizeView>
+                        <td>
+                            @*@item.Deliveries.First().CrewName*@
+                            @item.CrewName
+                        </td>
+                        <td>@item.CreatedAt.GetValueOrDefault().ToString("dd-MM-yyyy")</td>
+
+                        <td>
+                            @item.ConsignmentStateType
+                        </td>
+                        <td>
+                            @item.FromPartyCode
+                        </td>
+                        <td>
+                            @item.ToPartyCode
+                        </td>
+                        <td>
+                            @item.Amount.ToString("N0")
+                        </td>
+                         <td>
+                            @item.ShipmentType
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+    <EditForm Model="BaseIndexModel.CurrentIndex">
+        <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+    </EditForm>
+</FluentCard>

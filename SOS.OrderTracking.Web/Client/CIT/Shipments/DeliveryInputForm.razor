@@ -1,0 +1,62 @@
+﻿@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder 
+@using SOS.OrderTracking.Web.Client.Components 
+@using SOS.OrderTracking.Web.Shared.CIT.Shipments 
+<div class="form-group">
+    <label>Select Crew</label>
+    <Select2 class="form-control" @bind-Value="DeliveryFormViewModel.CrewId" Datasource="DeliveryFormViewModel.Crews" Id="__crew"></Select2>
+    <ValidationMessage For="() => DeliveryFormViewModel.CrewId"></ValidationMessage>
+</div>
+@if (AddLocationClicked)
+{
+    if (DeliveryFormViewModel.LocationId != null)
+    {
+        DeliveryFormViewModel.LocationId = null;
+    }
+    <div class="form-group">
+        <label>New Location</label>
+        <input @bind="DeliveryFormViewModel.LocationName" class="form-control" />
+        <ValidationMessage For="() => DeliveryFormViewModel.LocationName"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Latitude</label>
+        <input type="number" step="any" @bind="DeliveryFormViewModel.Latitude" class="form-control" />
+        <ValidationMessage For="() => DeliveryFormViewModel.Latitude"></ValidationMessage>
+    </div>
+    <div class="form-group">
+        <label>Longitude</label>
+        <input type="number" step="any" @bind="DeliveryFormViewModel.Longitude" class="form-control" />
+        <ValidationMessage For="() => DeliveryFormViewModel.Longitude"></ValidationMessage>
+    </div>
+
+}
+else
+{
+    <div class="form-group">
+        <label>Select Location</label>
+        <div class="input-group row">
+            <div class="col-11" style="padding-right:0px">
+                <Select2 class="form-control" @bind-Value="DeliveryFormViewModel.LocationId" Datasource="DeliveryFormViewModel.Locations" Id="__location"></Select2>
+                <ValidationMessage For="() => DeliveryFormViewModel.LocationId"></ValidationMessage>
+            </div>
+            <div class="col-1" style="padding-left:2px">
+                <div class="input-group-append h-100">
+                    <a class="btn btn-icon btn-light-danger " style="cursor:pointer;padding: 0.35rem 0.75rem;" @onclick="() => { AddLocationClicked = true; }">
+                        <i class="fa fa-pencil"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div class="form-group">
+    <label>Expected Time</label>  
+     <Radzen.Blazor.RadzenDatePicker Placeholder="Select Date/Time" TValue="DateTime?" @bind-Value="DeliveryFormViewModel.PlanedPickupTime" ShowTime="true" DateFormat="dd/MM/yyyy HH:mm" ></Radzen.Blazor.RadzenDatePicker>
+    <ValidationMessage For="() => DeliveryFormViewModel.PlanedPickupTime"></ValidationMessage>
+</div>
+@code {
+    [Parameter]
+    public DeliveryFormViewModel DeliveryFormViewModel { get; set; }
+    [Parameter]
+    public bool AddLocationClicked { get; set; }
+
+}

@@ -1,0 +1,73 @@
+﻿@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+
+@if (ShowConsignmentsViewModel != null)
+{
+    foreach (var consignment in ShowConsignmentsViewModel)
+    {
+        <div class="col-xl-12 mt-2">
+            <div class="card card-custom gutter-b" style="height:15em;">
+                @*    <div class="card-header">
+                    <div class="card-title">
+                        <h3 class="card-label">
+                            title
+                            <small>sub title</small>
+                                </h3>
+                            </div>
+                                </div>*@
+                <div class="card-body bg-light">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <label><b>@consignment.ShipmentCode</b></label><br />
+                                  <label class="label label-inline label-outline-primary font-weight-bolder mt-1">@consignment.ConsignmentStatus</label>
+                                   
+                            </div> 
+                              </div>
+
+                        <div class="col-6">
+
+                            <div class="mb-2">
+                                <label class="mt-1">
+                                    <i class="far fa-sack mr-2 text-warning"></i>
+                                      <label class="mt-1">PKR @consignment.Amount.ToString("N0")</label>
+                                </label>
+                                 
+                                <label class="mt-1">
+                                    <i class="far fa-clock mr-2 text-warning"></i>
+                                    @consignment.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label><b>Pickup</b></label><br />
+                                <label>
+                                    <i class="flaticon2-pin mr-2 text-warning"></i>
+                                    @consignment.PickupBranch
+                                </label>
+                            </div>
+                                   </div>
+
+                        <div class="col-12">
+                            <div class="mb-2">
+                                <label><b>DropOff</b></label><br />
+                                <label>
+                                    <i class="flaticon2-pin mr-2 text-warning"></i>
+                                    @consignment.DropoffBranch
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public IEnumerable<ShowConsignmentsViewModel> ShowConsignmentsViewModel { get; set; }
+}

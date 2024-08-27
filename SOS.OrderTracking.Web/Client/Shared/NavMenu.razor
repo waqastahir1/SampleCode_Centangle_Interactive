@@ -1,0 +1,364 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@inject NavigationManager Navigation
+@inject SignOutSessionStateManager SignOutManager
+
+<style>
+    i {
+        --fa-primary-color: #c22020;
+        --fa-secondary-color: #7a7a7a;
+    }
+
+    .text-danger {
+        color: #EB1B1B !important;
+    }
+
+    .inverse {
+        --fa-primary-color: #7a7a7a !important;
+        --fa-secondary-color: #c22020 !important;
+        --fa-primary-opacity: 0.5;
+        --fa-secondary-opacity: 0.7;
+    }
+    /*.menu-link:hover {
+        color: black !important;
+    }
+
+    .menu-text:hover {
+        color: black !important;
+    }*/
+
+    .menu-item.menu-item-active > .menu-link .menu-text {
+        color: black !important;
+    }
+</style>
+
+<ul class="menu-nav">
+
+    <AuthorizeView Roles="BANK,BankBranch,BankBranchManager,BankCPC,BankCPCManager">
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="/" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-chart-network"></i>
+                </span>
+                <span class="menu-text">Customer Dashboard</span>
+            </NavLink>
+        </li>
+    </AuthorizeView>
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="sosdashboard" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-chart-network"></i>
+                </span>
+                <span class="menu-text">SOS Dashboard</span>
+            </NavLink>
+        </li>
+    </AuthorizeView>
+     <li class="menu-section">
+            <h4 class="menu-text">CIT Operations</h4>
+            <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+        </li>
+
+        <li class="menu-item" aria-haspopup="true">
+            <a href="shipments/0" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-briefcase"></i>
+                </span>
+                <span class="menu-text">Live Shipments</span>
+            </a>
+        </li>
+    <AuthorizeView>
+       
+
+        <li class="menu-item" aria-haspopup="true">
+            <a href="shipments/1" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="far fa-clock" style="color:#c22020"></i>
+                </span>
+                <span class="menu-text">Scheduled Shipments</span>
+            </a>
+        </li>
+
+        <li class="menu-item" aria-haspopup="true">
+            <a href="shipments/recurring" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-recycle"></i>
+                </span>
+                <span class="menu-text">Recurring Shipment</span>
+            </a>
+        </li>
+
+    </AuthorizeView>
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/shipments/sipmentbreakups" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-folder-tree"></i>
+                </span>
+                <span class="menu-text">Shipments Breakups</span>
+            </a>
+        </li>
+    </AuthorizeView>
+    <AuthorizeView>
+
+        <li class="menu-section">
+            <h4 class="menu-text">ATMR Operations</h4>
+            <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/customer/atmrorders" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-lg fa-person-dolly"></i>
+                </span>
+                <span class="menu-text">ATM-R Consignment</span>
+            </a>
+        </li>
+
+    </AuthorizeView>
+
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+        <li class="menu-section">
+            <h4 class="menu-text">ADMIN - SOS</h4>
+            <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+        </li>
+
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/crews" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-users-class"></i>
+                </span>
+                <span class="menu-text">Manage Crews</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/vaults" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-key"></i>
+                </span>
+                <span class="menu-text">Manage Vaults</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/bankSetting" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-sliders-h-square"></i>
+                </span>
+                <span class="menu-text">Bank Setting</span>
+            </NavLink>
+        </li>
+
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/complaints" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-file-exclamation"></i>
+                </span>
+                <span class="menu-text">Complaints</span>
+            </NavLink>
+        </li>
+
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/admin/branches" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-paperclip"></i>
+                </span>
+                <span class="menu-text">Dedicated Vehicles</span>
+            </a>
+        </li>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="SOS-Admin">
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/admin/appointregionalhead" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-visor"></i>
+                </span>
+                <span class="menu-text">Regional Heads</span>
+            </a>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/admin/appointsubregionalhead" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-tie"></i>
+                </span>
+                <span class="menu-text">SubRegional Heads</span>
+            </a>
+        </li>
+
+    </AuthorizeView>
+
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/crewcheckin" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-calendar-plus"></i>
+                </span>
+                <span class="menu-text">Crew Checkin</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/crewcheckout" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-calendar-minus"></i>
+                </span>
+                <span class="menu-text">Crew Checkout</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="/admin/notifications" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-comments-alt"></i>
+                </span>
+                <span class="menu-text">Notification</span>
+            </NavLink>
+        </li>
+
+        @*     <li class="menu-item" aria-haspopup="true">
+                <NavLink href="admin/employees" class="menu-link">
+                    <span class="svg-icon menu-icon">
+                        <i class="fad fa-users"></i>
+                    </span>
+                    <span class="menu-text">Employees</span>
+                </NavLink>
+            </li>*@
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/vehicles" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-truck-container"></i>
+                </span>
+                <span class="menu-text">Vehicles</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/intrapartydistance" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-route"></i>
+                </span>
+                <span class="menu-text">Distances</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/admin/atmcustodians" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-friends"></i>
+                </span>
+                <span class="menu-text">ATM Teams</span>
+            </a>
+        </li>
+
+        <li class="menu-section">
+            <h4 class="menu-text">ADMIN - Guarding</h4>
+            <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+        </li>
+
+        <li class="menu-item" aria-haspopup="true">
+            <a href="admin/managegaurds" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-shield"></i>
+                </span>
+                <span class="menu-text">Manage Gaurds</span>
+            </a>
+        </li>
+
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/admin/gaurdsattendance" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-check"></i>
+                </span>
+                <span class="menu-text">Gaurds Attendance</span>
+            </a>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <a href="admin/additionalrequests" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-layer-plus"></i>
+                </span>
+                <span class="menu-text">Additional Requests</span>
+            </a>
+        </li>
+    </AuthorizeView>
+
+    @*
+        <li class="menu-item" aria-haspopup="true">
+            <a href="admin/atmchecklist" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-list-ul"></i>
+                </span>
+                <span class="menu-text">Generic CheckList</span>
+            </a>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <a href="/admin/bankchecklist" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-tasks"></i>
+                </span>
+                <span class="menu-text">Bank-wise CheckList</span>
+            </a>
+        </li>*@
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+        <li class="menu-section">
+            <h4 class="menu-text">User Accounts</h4>
+            <i class="menu-icon ki ki-bold-more-hor icon-md"></i>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/appusers" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-tag"></i>
+                </span>
+                <span class="menu-text">Internal Users</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/externalusers" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-unlock"></i>
+                </span>
+                <span class="menu-text">External Users</span>
+            </NavLink>
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <NavLink href="admin/bankusers" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-user-tag"></i>
+                </span>
+                <span class="menu-text">Bank Users</span>
+            </NavLink>
+        </li>
+    </AuthorizeView>
+
+    <AuthorizeView>
+        <li>
+            <hr />
+        </li>
+        <li class="menu-item" aria-haspopup="true">
+            <a @onclick="BeginSignOut" class="menu-link">
+                <span class="svg-icon menu-icon">
+                    <i class="fad fa-sign-out"></i>
+                </span>
+                <span class="menu-text">Logout</span>
+            </a>
+        </li>
+    </AuthorizeView>
+
+    @{
+        var assemblyVersion = typeof(SOS.OrderTracking.Web.Client.Program).Assembly.GetName().Version.ToString();
+
+    }
+    <li class="menu-item" aria-haspopup="true">
+        <span class="menu-link">
+            <span class="svg-icon menu-icon">
+                <i class="fad fa-info-circle"></i>
+            </span>
+            <span class="menu-text">@assemblyVersion.Substring(0, assemblyVersion.Length - 2) </span>
+        </span>
+    </li>
+</ul>
+
+
+@code{
+    private async Task BeginSignOut(MouseEventArgs args)
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
+    }
+}

@@ -1,0 +1,668 @@
+﻿@page "/shipments/recurring"
+@using SOS.OrderTracking.Web.Shared.ViewModels
+@using SOS.OrderTracking.Web.Shared.ViewModels.WorkOrder
+@using SOS.OrderTracking.Web.Client.Components
+@using SOS.OrderTracking.Web.Shared
+@using Radzen.Blazor
+@using SOS.OrderTracking.Web.Client.Pages.Customer 
+@using SOS.OrderTracking.Web.Client.Services.Customers
+@using SOS.OrderTracking.Web.Client.CIT.Shipments.Forms
+
+@inherits APICrudBaseV2<ShipmentScheduleFormViewModel, ShipmentScheduleListViewModel, int, BaseIndexModel, ShipmentSchedulesService>
+@attribute [Authorize]
+
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    .card-title {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .card {
+        box-shadow: 0 3.2px 7.2px 0 rgba(0,0,0,.132), 0 0.6px 1.8px 0 rgba(0,0,0,.108) !important;
+        box-shadow: 0 3.2px 7.2px 0 var(--callout-shadow-color,rgba(0, 0, 0, .132)),0 .6px 1.8px 0 var(--callout-shadow-secondary-color,rgba(0, 0, 0, .108)) !important;
+        height: 35.8em;
+    }
+
+    .timeline.timeline-5 .timeline-item {
+        margin-bottom: 1rem;
+    }
+
+    .card-body {
+        padding-top: 0 !important;
+    }
+
+    .card-header, .card-body {
+        padding: 1rem 1rem 0 1rem !important;
+    }
+
+    .card-footer {
+        border-top: none !important;
+        z-index: 300 !important;
+    }
+
+    .header-fixed.subheader-fixed .header {
+        background-color: white !important;
+    }
+
+    .header-fixed.subheader-fixed .subheader {
+        border-bottom: 1px solid #ddd;
+    }
+
+    .label.label-info {
+        color: #ffffff;
+        background-color: #24a4df;
+    }
+
+    .ps-left-box {
+        background: #c0e5f6;
+        border-radius: 5px;
+        margin-top: 2px !important;
+    }
+
+        .ps-left-box .form-control-solid {
+            background-color: #ffffff !important;
+        }
+
+    .urdu-font {
+        font-family: 'Noto Nastaliq Urdu Draft', serif;
+        font-size: 12px !important
+    }
+
+    .list-item-active {
+        background-color: #fdfeff;
+    }
+
+    .dropdown-toggle::after {
+        content: none !important;
+    }
+
+    .dropdown-toggle::before {
+        content: none !important;
+    }
+
+    .dropdown-toggle {
+        text-decoration: none !important;
+        cursor: pointer;
+        margin: 0 4px !important;
+    }
+
+    .invoice-list .card .card-header {
+        padding: 0.5rem 1rem !important;
+        height: auto !important;
+    }
+
+    .active > span > i {
+        color: white !important;
+    }
+
+    table th, .table td {
+        padding: 0.3rem;
+    }
+
+    .address {
+        border: 1px dashed #eee;
+        background: #fafafa;
+        cursor: pointer;
+    }
+
+    .timeline.timeline-3 .timeline-items .timeline-item .timeline-media {
+        border: 2px solid #aeaeae;
+    }
+
+    .timeline.timeline-3 .timeline-items .timeline-item {
+        border-left: 2px solid #aeaeae;
+    }
+
+    .gray {
+        color: #aeaeae !important;
+    }
+
+    .timeline.timeline-3 .timeline-items .timeline-item .timeline-content {
+        background-color: #dbeefc;
+    }
+
+        .timeline.timeline-3 .timeline-items .timeline-item .timeline-content:before {
+            border-right: solid 10px #dbeefc;
+        }
+
+    hr.st1 {
+        background: #479cc8;
+        border: 2px solid rgba(0, 0, 0, 0);
+        border-radius: 8px;
+    }
+</style>
+
+<SubHeader Heading="Recurring Shipments" RowsCount="@TotalRows">
+    <!--<a @onclick="()=> PubSub.Hub.Default.PublishAsync<CustomerReport>(null)"
+       class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">-->
+    <!--!-->
+    <!--<i class="far fa-print"></i>
+    </a>
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, BankBranch, BankBranchManager, BankCPC, BankCPCManager">
+        <a @onclick="()=> PubSub.Hub.Default.PublishAsync<CitGrid>(null)"
+           class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">-->
+    <!--!-->
+    <!--<i class="far fa-line-columns"></i>
+        </a>
+    </AuthorizeView>-->
+    <a @onclick="()=> LoadItems(true)" class="btn btn-icon btn-light-danger mr-2" style="cursor:pointer;">
+        <!--!-->
+        <i class="far fa-sync-alt"></i>
+    </a>
+
+    <AuthorizeView Roles="BankBranch, BankBranchManager, BankCPC, BankCPCManager">
+        <a @onclick="SendMoney" class="btn btn-light-danger font-weight-bold ml-3">
+            Send Money
+        </a>
+        <a @onclick="ReceiveMoney" class="btn btn-light-danger font-weight-bold ml-3">
+            Recieve Money
+        </a>
+    </AuthorizeView>
+    <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+        <a @onclick="CreateShipment" class="btn btn-light-danger font-weight-bold ml-3">
+            Create Shipment
+        </a>
+    </AuthorizeView>
+</SubHeader>
+
+<FluentContent IsBusy="IsTableBusy">
+    <div class="row">
+        @if (Items != null && userInfo != null)
+        {
+            @foreach (var item in Items)
+            {
+
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6">
+                    <div class="card card-custom gutter-b">
+                        <div class="card-header ribbon ribbon-right">
+                            <div class="ribbon-target " style="top: 10px; right: -2px;">
+                                <a style="cursor:pointer;" id="#__goback__@item.Id" onclick="switchTab('#__basic_info_@item.Id', '@item.Id')">
+                                    <i class="far fa-lg fa-home text-white mr-4"></i>
+                                </a>  @if (item.CreatedBy == User.Identity.Name)
+                                {
+                                    <a onclick="switchTab('#_schedule_@item.Id', '@item.Id')" data-toggle="tab">
+                                        <span>
+                                            <i class="far fa-alarm-clock mr-2  text-white"></i>
+                                        </span>
+                                    </a>
+                                }
+                                    <ul class="nav">
+                                        <li class="nav-item dropdown">
+                                            <div style="padding:4px;" class="nav-link dropdown-toggle text-white" data-toggle="dropdown" href="#"
+                                                 role="button" aria-haspopup="true" aria-expanded="false">
+                                                &nbsp; <i class="fa fa-ellipsis-v text-white"></i> &nbsp;
+                                            </div>
+                                            <div class="dropdown-menu dropdown-menu-sm dropdown-menu-right" style="padding:8px 0;">
+                                                <a href="#basic_info_@item.Id" data-toggle="tab" class="dropdown-item" id="__basic_info_@item.Id" style="display:none;"
+                                                   @onclick="() => { TabIndex = 0; }">
+                                                    <span><i class="flaticon2-list-3 mr-2"></i>Consignment</span>
+                                                </a>
+                                                <a href="#denomination_@item.Id" data-toggle="tab" class="dropdown-item" id="__denomination_@item.Id" style="display:none;"
+                                                   @onclick="() => { TabIndex = 1; }">
+                                                    <span><i class="flaticon2-gear mr-2"></i>Denomination</span>
+                                                </a>
+
+                                                <a href="#delivery_timeline_@item.Id" data-toggle="tab" class="dropdown-item" id="__delivery_timeline_@item.Id" style="display:none;"
+                                                   @onclick="() => { TabIndex = -1; }">
+                                                    <span class="navi-text">
+                                                        <i class="flaticon2-time mr-2"></i>Delivery Timeline
+                                                    </span>
+                                                </a>
+                                                @if (item.CreatedBy == User.Identity.Name)
+                                                {
+                                                    <div class="dropdown-divider"></div>
+
+                                                    <a onclick="switchTab('#_schedule_@item.Id', '@item.Id')" data-toggle="tab" class="dropdown-item">
+                                                        <span class="navi-text">
+                                                            <i class="far fa-user-plus mr-2"></i>Schedule
+                                                        </span>
+                                                    </a>
+                                                    <a href="#schedule_@item.Id" id="_schedule_@item.Id" data-toggle="tab" class="dropdown-item" style="display:none;"> </a>
+                                                }
+                                                <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin">
+
+                                                    <a class="dropdown-item" id="__assign_crew_@item.Id"
+                                                       @onclick="() => AssignCrewClicked(item.Id, item.Deliveries.First().Id, item.Deliveries.First().CrewId.GetValueOrDefault())">
+                                                        <span class="navi-text">
+                                                            <i class="far fa-user-plus mr-2"></i>Assign to Crew
+                                                        </span>
+                                                    </a>
+
+                                                    <a class="dropdown-item"
+                                                       @onclick='() => OnShipmentPlanClicked(item)'>
+                                                        <span class="navi-text">
+                                                            <i class="far fa-link mr-2"></i>Shipment Plan
+                                                        </span>
+                                                    </a>
+                                                </AuthorizeView>
+                                                <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, SOS-Headoffice-Billing">
+                                                    <a href="#charges_@item.Id" data-toggle="tab" class="dropdown-item"
+                                                       @onclick="() => { TabIndex = 4; }">
+                                                        <span class="navi-text">
+                                                            <i class="flaticon2-rocket-1 mr-2"></i>Shipment Charges
+                                                        </span>
+                                                    </a>
+                                                    <a class="dropdown-item"
+                                                       @onclick="() => { ShipmentAdministrationViewModel = new ShipmentAdministrationViewModel(item.Id, item.Distance/1000, item.DistanceStatus); }">
+                                                        <span class="navi-text">
+                                                            <i class="flaticon2-location mr-2"></i>Update Distance
+                                                        </span>
+                                                    </a>
+                                                    <div class="dropdown-divider"></div>
+
+                                                    <a class="dropdown-item" @onclick="() => OnConsignmentStatusChangeClicked(item.Id, Web.Shared.Enums.ConsignmentStatus.InvalidShipment)">
+                                                        <span class="navi-text">
+                                                            <i class="flaticon2-time mr-2"></i>Invalid
+                                                        </span>
+                                                    </a>
+                                                    <a class="dropdown-item" @onclick="() => OnConsignmentStatusChangeClicked(item.Id, Web.Shared.Enums.ConsignmentStatus.Cancelled)">
+                                                        <span class="navi-text">
+                                                            <i class="fas fa-align-slash mr-2"></i>Cancel
+                                                        </span>
+                                                    </a>
+                                                    <a class="dropdown-item" @onclick="() => OnConsignmentStatusChangeClicked(item.Id, Web.Shared.Enums.ConsignmentStatus.Declined)">
+                                                        <span class="navi-text">
+                                                            <i class="fas fa-ban mr-2"></i>Decline
+                                                        </span>
+                                                    </a>
+
+                                                </AuthorizeView>
+                                                <AuthorizeView Roles="BankBranchManager">
+                                                    @if (item.ApprovalState.HasFlag(ConsignmentApprovalState.Draft))
+                                                    {
+                                                        <a class="dropdown-item" @onclick="() => ApproveShipment(item.Id, ConsignmentApprovalState.Approved)">
+                                                            <span class="navi-text">
+                                                                <i class="fas fa-ban mr-2"></i>Approve
+                                                            </span>
+                                                        </a>
+
+                                                        <a class="dropdown-item" @onclick="() => ApproveShipment(item.Id, ConsignmentApprovalState.Declined)">
+                                                            <span class="navi-text">
+                                                                <i class="fas fa-ban mr-2"></i>Refuse
+                                                            </span>
+                                                        </a>
+
+                                                    }
+                                                </AuthorizeView>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            <style>
+                                .fad-gray {
+                                    --fa-primary-color: #6c6868;
+                                    --fa-secondary-color: #a79076 !important;
+                                    --fa-secondary-opacity: 1;
+                                    color: #a79076 !important;
+                                }
+                            </style>
+                            <h3 class="card-title">
+                                @item.ShipmentCode
+                                @{
+                                    string dateTime = item.CreatedAt.Date == DateTime.Today ?
+                                        "Today " + item.CreatedAt.ToString("HH:mm") : item.CreatedAt.ToString("dd-MM-yy HH:mm");
+                                }
+                                <span class="text-dark-50 mt-2 float-left w-100 font-weight-bold font-size-sm">@dateTime - by @item.CreatedBy</span>
+                            </h3>
+                            <div class="card-toolbar">
+
+                            </div>
+                        </div>
+                        <div class="card-body pt-4">
+                            <div class="tab-content" id="card_tabs_@item.Id">
+                                @{
+                                    @if (item.CurrencySymbol == CurrencySymbol.MixCurrency || item.CurrencySymbol == CurrencySymbol.PrizeBond || item.CurrencySymbol == CurrencySymbol.Other)
+                                        AmountInWords = CalculateAmountInWords(item.AmountPKR);
+                                    else
+                                        AmountInWords = CalculateAmountInWords(item.Amount);
+                                }
+                                <ShipmentCardFrontPage EditBranch="(t) => EditBranch(t.Item1,t.Item2,t.Item3)"
+                                                 item="@item"
+                                                 AmountInWords="@AmountInWords"
+                                                 ShowCrew="(id) => ShowCrew(id)"
+                                                 AssignCrewClicked="(t)=> AssignCrewClicked(t.Item1, t.Item2, t.Item3)" />
+
+                                @{ AmountInWords = CalculateAmountInWords(item.Amount);}
+
+                                <DenominationComponent Item="@item" AmountInWords="@AmountInWords"></DenominationComponent>
+
+                                <div class="tab-pane fade" id="sealcodes_@item.Id" role="tabpanel" aria-labelledby="_seilcodes_@item.Id">
+
+                                    <!--begin::Item-->
+                                    <h3>Seal Codes</h3>
+                                    @{string colour = "white";
+                                        int index = 1;}
+                                    <div class="row">
+                                        @if (item.SealCodes != null)
+                                        {
+                                            @foreach (var sealCode in item.SealCodes)
+                                            {
+                                                <div class="col-3" style="background-color:@colour">
+                                                    @sealCode
+                                                </div>
+                                                index++;
+
+                                                if (index % 2 == 0)
+                                                    colour = "#F8F8F8";
+                                                else
+                                                    colour = "white";
+
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                                <DeliveryTimelineComponent Item="item" ShowCrew="()=> ShowCrew(item.Deliveries.First().CrewId)" />
+
+                                <ScheduleComponent Item="item" />
+
+                                @if (item.ConsignmentStateType < ConsignmentState.InTransit)
+                                {
+                                    string qrCode = item.Deliveries.First().PickupCode;
+                                    <QRCode ItemId="@item.Id" Code="@qrCode"></QRCode>
+                                }
+                                else if (item.ConsignmentStateType >= ConsignmentState.InTransit)
+                                {
+                                    string qrCode = item.Deliveries.First().DropoffCode;
+                                    <QRCode ItemId="@item.Id" Code="@qrCode"></QRCode>
+                                }
+
+                                <ChargesComponent Item="item"></ChargesComponent>
+
+                            </div>
+                        </div>
+                        <div class="card-footer">
+
+                            <button id="__goback__@item.Id" style="display:none;" onclick="switchTab('#__basic_info_@item.Id', '@item.Id')"
+                                    class="float-right btn btn-sm btn-secondary">
+                                Go Back
+                            </button>
+                            <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, BankBranch, BankBranchManager, BankCPC, BankCPCManager">
+                                <button id="__schedule_@item.Id" @onclick="() => EditSchedule(item.Id)"
+                                        style="display:none" class="float-right btn btn-sm btn-light-danger ml-4 mr-4">
+                                    Update Schedule
+                                </button>
+                            </AuthorizeView>
+                            <AuthorizeView Roles="SOS-Admin, SOS-Regional-Admin, SOS-SubRegional-Admin, BankBranch, BankBranchManager, BankCPC, BankCPCManager">
+                                <button id="__denomation_update_@item.Id" @onclick="() => EditDenominationModel(item.Id)"
+                                        style="display:none" class="float-right btn btn-sm btn-light-danger ml-4 mr-4">
+                                    Update Denomination
+                                </button>
+                            </AuthorizeView>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+
+    </div>
+    <div class="mb-8 ml-4 mr-4">
+        <EditForm Model="BaseIndexModel.CurrentIndex">
+            <PaginationStrip @bind-Value="BaseIndexModel.CurrentIndex" TotalPages="TotalPages" TotalRows="TotalRows"></PaginationStrip>
+        </EditForm>
+    </div>
+</FluentContent>
+
+<InputForm SelectedItem="@SelectedItem"
+           IsBusy="@IsModalBusy"
+           Heading="@FormTitle"
+           Error="@ValidationError"
+           OnCancel="()=> SelectedItem = null"
+           OnValidSubmit="@OnFormSubmit">
+     
+    <ShipmentForm BillBranches="BillBranches" OrganizationalUnit="OrganizationalUnit" SelectedItem="SelectedItem" />
+</InputForm>
+
+
+<InputForm SelectedItem="@CitDenominationViewModel"
+           IsBusy="@IsModalBusy"
+           Heading="@FormTitle"
+           Error="@ValidationError"
+           OnCancel="()=> CitDenominationViewModel = null"
+           CancelButtonText="Skip"
+           OnValidSubmit="@SaveDenomination">
+
+    @{
+        TotalAmount = CalculateAmount(CitDenominationViewModel, CitDenominationViewModel.Type).GetValueOrDefault();
+        AmountPKR = Convert.ToInt32(TotalAmount.GetValueOrDefault() * CitDenominationViewModel.ExchangeRate);
+        AmountInWords = CalculateAmountInWords(AmountPKR);
+    }
+    <DenominationInputForm CitDenominationViewModel="CitDenominationViewModel" NewAmountPKR="(p)=> NewAmount(p.Item1,p.Item2)" />
+</InputForm>
+<InputForm SelectedItem="@DenominationChangeAmountViewModel"
+           OnCancel="()=> { DenominationChangeAmountViewModel = null; CitDenominationViewModel.SaveNewAmount = false; }"
+           IsBusy="@IsModalBusy"
+           ZIndex="1100"
+           Heading="Amount Confirmation Form "
+           Error="@ValidationError"
+           OnValidSubmit="async()=> {  CitDenominationViewModel.SaveNewAmount = true; DenominationChangeAmountViewModel = null; await SaveDenomination();}">
+    <div class="form-group">
+        <div class="input-group">
+            <label class="form-control font-size-h4 font-weight-bold">Previous Amount</label>
+            <label class="form-control font-size-h4 font-weight-bold">@DenominationChangeAmountViewModel.prevAmount.ToString("N0")</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="input-group">
+            <label class="form-control font-size-h4 font-weight-bold">New Amount</label>
+            <label class="form-control font-size-h4 font-weight-bold">@DenominationChangeAmountViewModel.newAmount.ToString("N0")</label>
+            <ValidationMessage For="() => DenominationChangeAmountViewModel.newAmount"></ValidationMessage>
+        </div>
+    </div>
+    <label>If you want to save new amount and remove previous one then please press save button... </label>
+</InputForm>
+<InputForm SelectedItem="@DeliveryChargesModel"
+           OnCancel="()=> DeliveryChargesModel = null"
+           IsBusy="@IsModalBusy"
+           Heading="Add Shipment Charges"
+           Error="@ValidationError"
+           OnValidSubmit="@SaveCharges">
+
+    <div class="form-group">
+        <label>Waiting Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.WaitingCharges"></InputNumber>
+    </div>
+    <div class="form-group">
+        <label>Toll Charges</label>
+        <InputNumber class="form-control" @bind-Value="DeliveryChargesModel.TollCharges"></InputNumber>
+    </div>
+</InputForm>
+
+<InputForm SelectedItem="@DeliveryCrewFormViewModel"
+           OnCancel="()=> DeliveryCrewFormViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           Heading="Assign a Crew"
+           OnValidSubmit="@SaveCrewAssignment">
+    <hr />
+    <br />
+    <div class="form-group">
+        @{ int i = 0;
+        }
+
+        @foreach (var crew in ShowAllCrews ? Crews : Crews.Take(5))
+        {
+            i++;
+            var color = crew.IntValue == DeliveryCrewFormViewModel.CrewId ? "gainsboro" : "white";
+            <div class="d-flex flex-wrap align-items-center mb-10" style="padding-right:8px; background-color:@color;"
+                 @onclick="() => DeliveryCrewFormViewModel.CrewId = crew.IntValue">
+                <!--begin::Symbol-->
+                <div class="symbol symbol-60 symbol-2by3 flex-shrink-0 mr-4">
+                    <div class="symbol-label" style="background-image: url('https://image.flaticon.com/icons/svg/0/93.svg')"></div>
+                </div>
+                <!--end::Symbol-->
+                <!--begin::Title-->
+                <div class="d-flex flex-column flex-grow-1 my-lg-0 my-2 pr-3">
+                    <span class="text-dark-75 font-weight-bolder font-size-lg">@crew.Text</span>
+                    <span class="text-dark-50 font-weight-bold font-size-sm my-1">
+                        <span class="text-primary font-weight-bold">@crew.PickeupStats</span>
+                    </span>
+                    <span class="text-dark-50 font-weight-bold font-size-sm">
+                        <span class="text-primary font-weight-bold">@crew.ConsignmentDistance</span>
+                    </span>
+                    <span class="text-dark-50 font-weight-bold font-size-sm">
+                        <span class="text-primary font-weight-bold">@crew.ClosetToDropffDistance</span>
+                    </span>
+                    <span class="text-dark-50 font-weight-bold font-size-sm" style="cursor:pointer; color:#1956d3 !important">
+                        <span class="text-info font-weight-bold" @onclick="() => ShowConsigments(crew.IntValue)">@crew.PickupUpConsignments</span>
+                    </span>
+                </div>
+
+                @if (crew.IntValue == DeliveryCrewFormViewModel.CrewId)
+                {
+                    <div class="d-flex align-items-center py-lg-0 py-2">
+                        <div class="d-flex flex-column text-right">
+                            <span class=""><i class="far fa-check-circle text-danger"></i></span>
+                        </div>
+                    </div>
+                }
+            </div>
+            @if (i == 5)
+            {
+                <hr />
+            }
+
+        }
+
+        <a class="float-right" style="color: #1555ea;" @onclick="()=> { ShowAllCrews = !ShowAllCrews; }">@(ShowAllCrews?"Show top 5...": "Show all...")</a>
+
+    </div>
+   
+</InputForm>
+<InputForm SelectedItem="@ShowConsignmentsViewModel"
+           OnCancel="()=> ShowConsignmentsViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           Heading="Consignments Pickedup by Crew"
+           OnValidSubmit="()=> ShowConsignmentsViewModel = null">
+
+    @if (ShowConsignmentsViewModel != null)
+    {
+        <DisplayConsignmentsInputForm ShowConsignmentsViewModel="ShowConsignmentsViewModel" />
+    }
+
+</InputForm>
+<InputForm SelectedItem="@CrewMembersViewModel"
+           OnCancel="()=> CrewMembersViewModel = null"
+           IsBusy="@IsModalBusy"
+           ZIndex="1002"
+           Heading="Crew Detail">
+
+    <div class="">
+        @foreach (var item in CrewMembersViewModel.Where(x => x.RelationshipType == RoleType.CheifCrewAgent
+|| x.RelationshipType == RoleType.AssistantCrewAgent))
+        {
+            @if (string.IsNullOrEmpty(item.ImageLink))
+            {
+                <span style="text-align:center; padding:8px;">
+                    <i class="fa fa-user" style="font-size:128pt; border:1px gray solid;  text-align:center"></i>
+                </span>
+            }
+            else
+            {
+                <span style="text-align:center; padding:8px;">
+                    <img src="@item.ImageLink" width="128" />
+                </span>
+            }
+
+            <div class="d-flex flex-column">
+                <a href="#" class="text-dark font-weight-bold text-hover-primary font-size-h4 mb-0">@item.EmployeeName</a>
+                <span class="text-muted font-weight-bold">@item.RelationshipType</span>
+                <span class="text-muted font-weight-bold">@item.NationalId</span>
+            </div>
+
+            <hr />
+            <br />
+        }
+    </div>
+</InputForm>
+
+
+<InputForm SelectedItem="@DomesticShipmentViewModel"
+           OnCancel="()=> DomesticShipmentViewModel = null"
+           IsBusy="IsModalBusy"
+           Heading="Plan a Domestic Shipment">
+
+    <DomesticShipmentInputForm DomesticShipmentViewModel="DomesticShipmentViewModel"
+                               ConsignmentDeliveryClicked="()=> OnConsignmentDeliveryClicked(DomesticShipmentViewModel.ConsignmentId)"
+                               ShowCrew="(t)=> ShowCrew((int?)t)" />
+
+</InputForm>
+
+
+<InputForm SelectedItem="@DeliveryFormViewModel"
+           OnCancel="()=> { DeliveryFormViewModel = null; AddLocationClicked = false; }"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           ZIndex="1002"
+           OnValidSubmit="async() => { await SaveConsignmentDelivery();}"
+           Heading="Provide Delivery Details">
+
+    <DeliveryInputForm DeliveryFormViewModel="DeliveryFormViewModel" AddLocationClicked="AddLocationClicked" />
+
+</InputForm>
+
+<InputForm SelectedItem="@ShipmentAdministrationViewModel"
+           OnCancel="()=> ShipmentAdministrationViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="FinalizeShipment"
+           Heading="Provide Delivery Details">
+</InputForm>
+@*<InputForm SelectedItem="@BranchFormViewModel"
+           OnCancel="()=> BranchFormViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="ChangeBranchInfo"
+           Heading="Change Branch Information">
+
+    <BranchInputForm BranchFormViewModel="BranchFormViewModel" />
+
+</InputForm>*@
+<InputForm SelectedItem="@ConsignmentStatusViewModel"
+           OnCancel="()=> ConsignmentStatusViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="PostConsignmentStatus"
+           Heading="Change Consignment Status">
+
+    <div class="form-group">
+        <label>Comments</label>
+        <textarea class="form-control" @bind="@ConsignmentStatusViewModel.Comments"></textarea>
+    </div>
+</InputForm>
+<InputForm SelectedItem="@ConsignmentApprrovalViewModel"
+           OnCancel="()=> ConsignmentApprrovalViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="ApproveConsignmentStatus"
+           Heading="Approve Shipment">
+
+    <div class="form-group">
+        <label>Comments</label>
+        <textarea class="form-control" @bind="@ConsignmentApprrovalViewModel.Comments"></textarea>
+    </div>
+</InputForm>
+
+<InputForm SelectedItem="@ScheduleViewModel"
+           OnCancel="()=> ScheduleViewModel = null"
+           IsBusy="@IsModalBusy"
+           Error="@ValidationError"
+           OnValidSubmit="SaveSchedule"
+           Heading="Schedule Form">
+
+    <ScheduleInputForm ScheduleViewModel="ScheduleViewModel" />
+
+</InputForm>
+
